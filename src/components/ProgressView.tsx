@@ -12,12 +12,17 @@ import './ProgressView.css'
 
 type Period = 'week' | 'month'
 
-export function ProgressView() {
-  const [period, setPeriod] = useState<Period>('week')
-  const [refreshKey, setRefreshKey] = useState(0)
+interface ProgressViewProps {
+  refreshKey?: number
+}
 
-  const comparison = useMemo(() => getPeriodComparison(period), [period, refreshKey])
-  const history = useMemo(() => loadCompletedWorkouts().slice(0, 8), [refreshKey])
+export function ProgressView({ refreshKey = 0 }: ProgressViewProps) {
+  const [period, setPeriod] = useState<Period>('week')
+  const [localRefresh, setLocalRefresh] = useState(0)
+  const effectiveRefresh = refreshKey + localRefresh
+
+  const comparison = useMemo(() => getPeriodComparison(period), [period, effectiveRefresh])
+  const history = useMemo(() => loadCompletedWorkouts().slice(0, 8), [effectiveRefresh])
 
   const currentValues = useMemo((): MuscleMapValues => {
     const values: MuscleMapValues = {}
@@ -85,7 +90,7 @@ export function ProgressView() {
         >
           Mensual
         </button>
-        <button type="button" className="progress-view__refresh" onClick={() => setRefreshKey((k) => k + 1)}>
+        <button type="button" className="progress-view__refresh" onClick={() => setLocalRefresh((k) => k + 1)}>
           Actualizar
         </button>
       </div>

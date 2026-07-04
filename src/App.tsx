@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 import { BodyDiagram } from './components/BodyDiagram'
+import { Dashboard } from './components/Dashboard'
 import { MuscleDetailView } from './components/MuscleDetailView'
 import { MusclePanel } from './components/MusclePanel'
 import { MuscleSearch } from './components/MuscleSearch'
 import { AppNav } from './components/AppNav'
 import { BodyHalfFilterBar } from './components/BodyHalfFilter'
-import { RoutineBuilder } from './components/RoutineBuilder'
+import { WorkoutLogger } from './components/WorkoutLogger'
 import { ProgressView } from './components/ProgressView'
 import type { SearchResult } from './lib/searchIndex'
 import { muscleMatchesBodyHalf } from './lib/bodyHalf'
@@ -15,19 +16,22 @@ import type { AppMode, AppSection, BodyHalfFilter, BodyView, ExerciseFocus } fro
 import './App.css'
 
 function App() {
-  const [section, setSection] = useState<AppSection>('explore')
+  const [section, setSection] = useState<AppSection>('dashboard')
   const [bodyHalfFilter, setBodyHalfFilter] = useState<BodyHalfFilter>('all')
   const [view, setView] = useState<BodyView>('front')
   const [mode, setMode] = useState<AppMode>({ type: 'body' })
+  const [selectedMuscleId, setSelectedMuscleId] = useState<string | null>(null)
   const [hoveredMuscleId, setHoveredMuscleId] = useState<string | null>(null)
   const [exerciseFocus, setExerciseFocus] = useState<ExerciseFocus | null>(null)
-  const [progressRefresh, setProgressRefresh] = useState(0)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [routineMuscleIds, setRoutineMuscleIds] = useState<string[]>([])
 
   const detailMuscleId = mode.type === 'detail' ? mode.muscleId : null
   const activeHeadId = mode.type === 'detail' ? mode.headId : null
 
-  const previewMuscleId = mode.type === 'body' ? hoveredMuscleId : detailMuscleId
-  const displayMuscle = previewMuscleId ? muscleMap.get(previewMuscleId) ?? null : null
+  const panelMuscleId =
+    mode.type === 'detail' ? detailMuscleId : hoveredMuscleId ?? selectedMuscleId
+  const displayMuscle = panelMuscleId ? muscleMap.get(panelMuscleId) ?? null : null
 
   const detailConfig = detailMuscleId ? getMuscleDetail(detailMuscleId) : undefined
   const activeHead = detailConfig?.heads.find((h) => h.id === activeHeadId) ?? detailConfig?.heads[0] ?? null
@@ -40,6 +44,10 @@ function App() {
     [view, bodyHalfFilter],
   )
 
+  function bumpRefresh() {
+    setRefreshKey((k) => k + 1)
+  }
+
   function openMuscleDetail(muscleId: string, requiredView?: BodyView) {
     const muscle = muscleMap.get(muscleId)
     const nextView = requiredView ?? muscle?.view ?? 'front'
@@ -47,6 +55,7 @@ function App() {
     setView(nextView)
     setExerciseFocus(null)
     setHoveredMuscleId(null)
+    setSelectedMuscleId(muscleId)
     const defaultHead = getDefaultHeadId(muscleId)
     setMode({ type: 'detail', muscleId, headId: defaultHead })
   }
@@ -54,6 +63,7 @@ function App() {
   function handleSearchSelect(result: SearchResult) {
     setSection('explore')
     setView(result.view)
+    setSelectedMuscleId(result.muscleId)
     setExerciseFocus(
       result.exerciseName || result.equipment
         ? { exerciseName: result.exerciseName, equipment: result.equipment }
@@ -74,7 +84,17 @@ function App() {
   }
 
   function handleMuscleSelectFromMap(muscleId: string, requiredView: BodyView) {
-    openMuscleDetail(muscleId, requiredView)
+    const muscle = muscleMap.get(muscleId)
+    setView(requiredView ?? muscle?.view ?? 'front')
+    setSelectedMuscleId(muscleId)
+    setHoveredMuscleId(null)
+    setMode({ type: 'body' })
+    setExerciseFocus(null)
+  }
+
+  function handleStartRoutine(muscleId: string) {
+    setRoutineMuscleIds([muscleId])
+    setSection('routines')
   }
 
   function handleSectionChange(next: AppSection) {
@@ -87,11 +107,14 @@ function App() {
   }
 
   const subtitleBySection: Record<AppSection, string> = {
+    dashboard: 'Tu resumen de entrenamiento, récords y mapa de recuperación.',
     explore:
-      'Cuerpo anatómico realista: pasa el cursor, filtra por tren superior o inferior, y haz clic para ver cabezas y ejercicios.',
-    routines: 'Elige 1 a 3 grupos musculares por día y genera una rutina con ejercicios sugeridos.',
+      'Cuerpo interactivo: colores según recuperación. Clic en un músculo para ver stats y armar rutina.',
+    routines: 'Registrá peso, series, repeticiones, descanso y notas de cada ejercicio.',
     progress: 'Compara tus entrenamientos semana a semana o mes a mes.',
   }
+
+  const showSidePanel = section === 'explore'
 
   return (
     <div className="app">
@@ -100,12 +123,22 @@ function App() {
           <p className="app__eyebrow">Anatomía interactiva</p>
           <h1>Muscle Atlas</h1>
           <p className="app__subtitle">{subtitleBySection[section]}</p>
-          {section === 'explore' && <MuscleSearch onSelectResult={handleSearchSelect} />}
+          {(section === 'explore' || section === 'dashboard') && (
+            <MuscleSearch onSelectResult={handleSearchSelect} />
+          )}
           <AppNav section={section} onSectionChange={handleSectionChange} />
         </div>
       </header>
 
-      <main className={`app__main${section !== 'explore' ? ' app__main--single' : ''}`}>
+      <main className={`app__main${!showSidePanel ? ' app__main--single' : ''}`}>
+        {section === 'dashboard' && (
+          <Dashboard
+            refreshKey={refreshKey}
+            onStartWorkout={() => setSection('routines')}
+            onExplore={() => setSection('explore')}
+          />
+        )}
+
         {section === 'explore' && (
           <>
             <section className="app__diagram-section">
@@ -134,7 +167,9 @@ function App() {
                 <BodyDiagram
                   view={view}
                   bodyHalfFilter={bodyHalfFilter}
+                  selectedMuscleId={selectedMuscleId}
                   hoveredMuscleId={hoveredMuscleId}
+                  refreshKey={refreshKey}
                   onMuscleHover={setHoveredMuscleId}
                   onMuscleSelect={handleMuscleSelectFromMap}
                 />
@@ -153,10 +188,10 @@ function App() {
                     <button
                       key={muscle.id}
                       type="button"
-                      className={`muscle-chip${hoveredMuscleId === muscle.id ? ' muscle-chip--active' : ''}`}
+                      className={`muscle-chip${(hoveredMuscleId ?? selectedMuscleId) === muscle.id ? ' muscle-chip--active' : ''}`}
                       onMouseEnter={() => setHoveredMuscleId(muscle.id)}
                       onMouseLeave={() => setHoveredMuscleId(null)}
-                      onClick={() => openMuscleDetail(muscle.id, muscle.view)}
+                      onClick={() => handleMuscleSelectFromMap(muscle.id, muscle.view)}
                     >
                       {muscle.name}
                     </button>
@@ -169,21 +204,32 @@ function App() {
               muscle={displayMuscle}
               activeHead={mode.type === 'detail' ? activeHead : null}
               pinned={mode.type === 'detail'}
-              preview={mode.type === 'body' && hoveredMuscleId !== null}
+              preview={mode.type === 'body' && hoveredMuscleId !== null && !selectedMuscleId}
               exerciseFocus={exerciseFocus}
+              refreshKey={refreshKey}
+              onOpenDetail={
+                selectedMuscleId && mode.type === 'body'
+                  ? () => openMuscleDetail(selectedMuscleId)
+                  : undefined
+              }
+              onStartRoutine={mode.type === 'body' ? handleStartRoutine : undefined}
             />
           </>
         )}
 
         {section === 'routines' && (
-          <RoutineBuilder
+          <WorkoutLogger
             bodyHalfFilter={bodyHalfFilter}
             onBodyHalfChange={setBodyHalfFilter}
-            onWorkoutSaved={() => setProgressRefresh((k) => k + 1)}
+            initialMuscleIds={routineMuscleIds}
+            onWorkoutSaved={() => {
+              bumpRefresh()
+              setRoutineMuscleIds([])
+            }}
           />
         )}
 
-        {section === 'progress' && <ProgressView key={progressRefresh} />}
+        {section === 'progress' && <ProgressView key={refreshKey} refreshKey={refreshKey} />}
       </main>
     </div>
   )

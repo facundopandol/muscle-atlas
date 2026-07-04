@@ -1,6 +1,10 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ExerciseCard } from './ExerciseCard'
-import type { ExerciseFocus, Muscle, MuscleHead } from '../types'
+import { ExerciseHistoryView } from './ExerciseHistoryView'
+import { formatLastTrained, getMuscleRecovery, RECOVERY_LABELS } from '../lib/analytics'
+import { exerciseKey } from '../lib/exerciseKey'
+import { loadFavorites, toggleFavorite } from '../lib/trainingStorage'
+import type { Equipment, ExerciseFocus, Muscle, MuscleHead } from '../types'
 import './MusclePanel.css'
 
 interface MusclePanelProps {
@@ -9,44 +13,90 @@ interface MusclePanelProps {
   pinned: boolean
   preview?: boolean
   exerciseFocus?: ExerciseFocus | null
+  refreshKey?: number
+  onOpenDetail?: () => void
+  onStartRoutine?: (muscleId: string) => void
 }
 
-export function MusclePanel({ muscle, activeHead, pinned, preview, exerciseFocus }: MusclePanelProps) {
+export function MusclePanel({
+  muscle,
+  activeHead,
+  pinned,
+  preview,
+  exerciseFocus,
+  refreshKey = 0,
+  onOpenDetail,
+  onStartRoutine,
+}: MusclePanelProps) {
   const listRef = useRef<HTMLUListElement>(null)
+  const [favorites, setFavorites] = useState<Set<string>>(() => loadFavorites())
+  const [historyTarget, setHistoryTarget] = useState<{
+    exerciseName: string
+    equipment: Equipment
+  } | null>(null)
+
+  useEffect(() => {
+    setFavorites(loadFavorites())
+  }, [refreshKey, muscle?.id])
 
   useEffect(() => {
     if (!muscle || !exerciseFocus?.exerciseName) return
-
     const slug = exerciseFocus.exerciseName.replace(/\s+/g, '-').toLowerCase()
-    const el = document.getElementById(`exercise-${slug}`)
-    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    document.getElementById(`exercise-${slug}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [muscle, exerciseFocus])
+
+  const recovery = useMemo(
+    () => (muscle ? getMuscleRecovery(muscle.id) : null),
+    [muscle, refreshKey],
+  )
+
+  const shownExercises = useMemo(() => {
+    if (!muscle) return []
+    let list = muscle.exercises.filter((exercise) => {
+      if (!activeHead?.exerciseHints?.length) return true
+      return activeHead.exerciseHints.some(
+        (hint) =>
+          exercise.name.toLowerCase().includes(hint.toLowerCase()) ||
+          hint.toLowerCase().includes(exercise.name.toLowerCase()),
+      )
+    })
+    return list.length > 0 ? list : muscle.exercises
+  }, [muscle, activeHead])
+
+  function handleToggleFavorite(exerciseName: string, equipment: Equipment) {
+    if (!muscle) return
+    const key = exerciseKey(muscle.id, exerciseName, equipment)
+    toggleFavorite(key)
+    setFavorites(loadFavorites())
+  }
 
   if (!muscle) {
     return (
       <aside className="muscle-panel muscle-panel--empty">
         <div className="muscle-panel__placeholder">
-          <span className="muscle-panel__icon" aria-hidden="true">
-            ◉
-          </span>
+          <span className="muscle-panel__icon" aria-hidden="true">◉</span>
           <h2>Explora el cuerpo</h2>
           <p>
-            Pasa el cursor sobre una zona (brazo, pecho, pierna…) y elige un músculo. Verás la vista
-            ampliada con sus cabezas y ejercicios.
+            Los músculos se colorean según cuándo los entrenaste. Haz clic en una zona para ver
+            volumen, recuperación y armar tu rutina.
           </p>
         </div>
       </aside>
     )
   }
 
-  const exercises = muscle.exercises.filter((exercise) => {
-    if (!activeHead?.exerciseHints?.length) return true
-    return activeHead.exerciseHints.some(
-      (hint) => exercise.name.toLowerCase().includes(hint.toLowerCase()) || hint.toLowerCase().includes(exercise.name.toLowerCase()),
+  if (historyTarget) {
+    return (
+      <aside className="muscle-panel">
+        <ExerciseHistoryView
+          muscleId={muscle.id}
+          exerciseName={historyTarget.exerciseName}
+          equipment={historyTarget.equipment}
+          onClose={() => setHistoryTarget(null)}
+        />
+      </aside>
     )
-  })
-
-  const shownExercises = exercises.length > 0 ? exercises : muscle.exercises
+  }
 
   return (
     <aside className={`muscle-panel${pinned ? ' muscle-panel--pinned' : ''}`}>
@@ -55,19 +105,50 @@ export function MusclePanel({ muscle, activeHead, pinned, preview, exerciseFocus
           {pinned ? 'Músculo activo' : preview ? 'Vista previa' : 'Selección'}
         </span>
         <h2>{activeHead ? activeHead.name : muscle.name}</h2>
-        <p>{activeHead ? activeHead.description : muscle.description}</p>
-        {activeHead && (
-          <div className="muscle-panel__head-train">
-            <strong>Cómo trabajarlo</strong>
-            <p>{activeHead.howToTrain}</p>
+
+        {recovery && (
+          <div className="muscle-panel__insights">
+            <div className="muscle-panel__insight-row">
+              <span>Ejercicios</span>
+              <strong>{recovery.exerciseCount}</strong>
+            </div>
+            <div className="muscle-panel__insight-row">
+              <span>Último entrenado</span>
+              <strong>{formatLastTrained(recovery)}</strong>
+            </div>
+            <div className="muscle-panel__insight-row">
+              <span>Volumen semanal</span>
+              <strong>{recovery.weeklySets} series</strong>
+            </div>
+            <div className="muscle-panel__insight-row">
+              <span>Recuperación</span>
+              <strong>{recovery.recoveryPercent} %</strong>
+            </div>
+            <p className={`muscle-panel__recovery-tag muscle-panel__recovery-tag--${recovery.status}`}>
+              {RECOVERY_LABELS[recovery.status]}
+            </p>
           </div>
         )}
+
+        <div className="muscle-panel__actions">
+          {onStartRoutine && (
+            <button type="button" className="muscle-panel__action-btn" onClick={() => onStartRoutine(muscle.id)}>
+              Armar rutina
+            </button>
+          )}
+          {onOpenDetail && (
+            <button type="button" className="muscle-panel__action-btn muscle-panel__action-btn--ghost" onClick={onOpenDetail}>
+              Ver anatomía
+            </button>
+          )}
+        </div>
+
+        {activeHead && <p className="muscle-panel__desc">{activeHead.description}</p>}
+        {!activeHead && <p className="muscle-panel__desc">{muscle.description}</p>}
       </header>
 
       <section className="muscle-panel__exercises">
-        <h3>
-          {activeHead ? `Ejercicios para ${activeHead.name.toLowerCase()}` : 'Ejercicios recomendados'}
-        </h3>
+        <h3>Ejercicios ({shownExercises.length})</h3>
         <ul ref={listRef}>
           {shownExercises.map((exercise) => {
             const isHighlighted =
@@ -80,8 +161,14 @@ export function MusclePanel({ muscle, activeHead, pinned, preview, exerciseFocus
               <ExerciseCard
                 key={exercise.name}
                 exercise={exercise}
+                muscleId={muscle.id}
                 focus={exerciseFocus}
                 highlighted={isHighlighted}
+                isFavorite={exercise.variants.some((v) =>
+                  favorites.has(exerciseKey(muscle.id, exercise.name, v.equipment)),
+                )}
+                onToggleFavorite={(eq) => handleToggleFavorite(exercise.name, eq)}
+                onViewHistory={(eq) => setHistoryTarget({ exerciseName: exercise.name, equipment: eq })}
               />
             )
           })}

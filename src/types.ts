@@ -2,7 +2,7 @@ export type BodyView = 'front' | 'back'
 
 export type BodyHalfFilter = 'all' | 'upper' | 'lower'
 
-export type AppSection = 'explore' | 'routines' | 'progress'
+export type AppSection = 'dashboard' | 'explore' | 'routines' | 'progress'
 
 export type Equipment = 'dumbbell' | 'machine' | 'barbell' | 'cable' | 'bodyweight'
 
@@ -169,4 +169,73 @@ export interface PeriodComparison {
     workouts: number
     muscleStats: MuscleTrainingStats[]
   }
+}
+
+export type ExerciseLevel = 'beginner' | 'intermediate' | 'advanced'
+
+export type MovementPattern = 'push' | 'pull' | 'hinge' | 'squat' | 'core' | 'isolation'
+
+export type ExerciseCategory = 'compound' | 'isolation'
+
+export interface LoggedSet {
+  weightKg: number
+  reps: number
+  restSec?: number
+}
+
+export interface LoggedExercise {
+  id: string
+  muscleId: string
+  exerciseName: string
+  equipment: Equipment
+  sets: LoggedSet[]
+  notes?: string
+}
+
+export interface WorkoutSession {
+  id: string
+  date: string
+  label: string
+  muscleIds: string[]
+  exercises: LoggedExercise[]
+  completedAt: string
+}
+
+export interface PersonalRecord {
+  key: string
+  exerciseName: string
+  muscleId: string
+  equipment: Equipment
+  weightKg: number
+  reps: number
+  date: string
+  sessionId: string
+}
+
+export type RecoveryStatus = 'fresh' | 'recent' | 'moderate' | 'long' | 'never'
+
+export interface MuscleRecoveryInfo {
+  muscleId: string
+  status: RecoveryStatus
+  lastTrainedDate: string | null
+  daysSince: number | null
+  weeklySets: number
+  recoveryPercent: number
+  exerciseCount: number
+}
+
+export interface DashboardStats {
+  workoutsThisMonth: number
+  totalSets: number
+  totalVolumeKg: number
+  prsThisMonth: number
+  recentPrs: PersonalRecord[]
+}
+
+export interface ExerciseHistoryEntry {
+  date: string
+  weightKg: number
+  reps: number
+  sets: number
+  sessionId: string
 }

@@ -125,3 +125,84 @@
 .muscle-panel__attribution a {
   color: var(--accent);
 }
+
+.muscle-panel__insights {
+  margin: 0.85rem 0;
+  padding: 0.75rem;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem 0.75rem;
+}
+
+.muscle-panel__insight-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.78rem;
+}
+
+.muscle-panel__insight-row span {
+  color: var(--text-muted);
+}
+
+.muscle-panel__insight-row strong {
+  color: var(--text-h);
+  font-size: 0.88rem;
+}
+
+.muscle-panel__recovery-tag {
+  grid-column: 1 / -1;
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.muscle-panel__recovery-tag--fresh { background: rgba(192, 57, 43, 0.15); color: #c0392b; }
+.muscle-panel__recovery-tag--recent { background: rgba(224, 112, 48, 0.15); color: #e07030; }
+.muscle-panel__recovery-tag--moderate { background: rgba(212, 160, 23, 0.15); color: #b8860b; }
+.muscle-panel__recovery-tag--long { background: rgba(90, 154, 110, 0.15); color: #5a9a6e; }
+.muscle-panel__recovery-tag--never { background: rgba(156, 163, 175, 0.15); color: #9ca3af; }
+
+.muscle-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.65rem 0;
+}
+
+.muscle-panel__action-btn {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.muscle-panel__action-btn--ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-h);
+}
+
+.muscle-panel__desc {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.muscle-panel__no-results {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}

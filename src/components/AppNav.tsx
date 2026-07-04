@@ -7,8 +7,9 @@ interface AppNavProps {
 }
 
 const SECTIONS: Array<{ id: AppSection; label: string }> = [
+  { id: 'dashboard', label: 'Inicio' },
   { id: 'explore', label: 'Explorar' },
-  { id: 'routines', label: 'Rutinas' },
+  { id: 'routines', label: 'Entrenar' },
   { id: 'progress', label: 'Progreso' },
 ]
 

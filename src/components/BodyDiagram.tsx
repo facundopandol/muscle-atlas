@@ -6,6 +6,7 @@ import maleFront from '@musclemap/assets/bodies/male-front.webp'
 import maleBack from '@musclemap/assets/bodies/male-back.webp'
 import { BodyFigure } from '@musclemap/react'
 import type { BodyView, BodyHalfFilter } from '../types'
+import { recoveryScoreForMuscle } from '../lib/analytics'
 import {
   GROUPS_WITH_SUBMENU,
   mmGroupToMuscleId,
@@ -19,7 +20,9 @@ import './BodyDiagram.css'
 interface BodyDiagramProps {
   view: BodyView
   bodyHalfFilter: BodyHalfFilter
+  selectedMuscleId: string | null
   hoveredMuscleId: string | null
+  refreshKey?: number
   onMuscleHover: (muscleId: string | null) => void
   onMuscleSelect: (muscleId: string, requiredView: BodyView) => void
 }
@@ -47,11 +50,7 @@ function SubmenuPicker({
       <ul className="region-menu__list">
         {options.map((opt) => (
           <li key={opt.muscleId}>
-            <button
-              type="button"
-              className="region-menu__btn"
-              onClick={() => onSelect(opt.muscleId)}
-            >
+            <button type="button" className="region-menu__btn" onClick={() => onSelect(opt.muscleId)}>
               {opt.label}
             </button>
           </li>
@@ -64,7 +63,9 @@ function SubmenuPicker({
 export function BodyDiagram({
   view,
   bodyHalfFilter,
+  selectedMuscleId,
   hoveredMuscleId,
+  refreshKey = 0,
   onMuscleHover,
   onMuscleSelect,
 }: BodyDiagramProps) {
@@ -85,15 +86,27 @@ export function BodyDiagram({
 
   const activeGroup = useMemo(() => {
     if (hoveredGroup) return hoveredGroup
-    if (!hoveredMuscleId) return null
-    return muscleIdToMmGroup(hoveredMuscleId)
-  }, [hoveredGroup, hoveredMuscleId])
+    const muscleId = hoveredMuscleId ?? selectedMuscleId
+    if (!muscleId) return null
+    return muscleIdToMmGroup(muscleId)
+  }, [hoveredGroup, hoveredMuscleId, selectedMuscleId])
+
+  const recoveryValues = useMemo((): MuscleMapValues => {
+    const values: MuscleMapValues = {}
+    for (const group of visibleGroups) {
+      const muscleId = mmGroupToMuscleId(group)
+      if (!muscleId || !muscleMatchesBodyHalf(muscleId, bodyHalfFilter)) continue
+      values[group] = { score: recoveryScoreForMuscle(muscleId) }
+    }
+    return values
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibleGroups, bodyHalfFilter, refreshKey])
 
   const highlightValues = useMemo((): MuscleMapValues => {
     const group = hoveredGroup ?? activeGroup
-    if (!group) return {}
-    return { [group]: { score: 100 } }
-  }, [hoveredGroup, activeGroup])
+    if (!group) return recoveryValues
+    return { ...recoveryValues, [group]: { score: 100 } }
+  }, [hoveredGroup, activeGroup, recoveryValues])
 
   function handleHover(group: MuscleGroup | null) {
     setHoveredGroup(group)
@@ -136,7 +149,7 @@ export function BodyDiagram({
           diagram={diagram}
           cropViewBox={cropViewBox}
           values={highlightValues}
-          colorModel="LOAD"
+          colorModel="RECOVERY_RISK"
           monochromeColor={MUSCLE_HIGHLIGHT_COLOR}
           monochromeBaseColor="#9ca3af"
           visibleGroups={visibleGroups}
@@ -164,7 +177,7 @@ export function BodyDiagram({
       </div>
 
       <p className="body-diagram__hint">
-        Pasa el cursor sobre un músculo · Haz clic para ver detalle y ejercicios
+        Colores = recuperación · Clic para seleccionar · Armar rutina desde el panel
       </p>
       <p className="body-diagram__credit">
         Anatomía por{' '}

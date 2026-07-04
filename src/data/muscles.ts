@@ -86,6 +86,62 @@ export const muscles: Muscle[] = [
           },
         ],
       },
+      {
+        name: 'Press inclinado en multipower',
+        sets: '4',
+        reps: '8-12',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'pectorals/smith-incline-bench-press.gif',
+            illustration: 'incline-press',
+            formGuide:
+              'Banco inclinado bajo la barra guiada. Baja al pecho alto con codos a 45°. Empuja en línea recta sin despegar la espalda del banco.',
+          },
+          {
+            equipment: 'machine',
+            gifFile: 'pectorals/lever-incline-chest-press.gif',
+            illustration: 'incline-press',
+            formGuide:
+              'Ajusta el asiento para alinear los agarres con el pecho superior. Empuja convergiendo ligeramente sin bloquear los codos.',
+          },
+        ],
+      },
+      {
+        name: 'Cruces en polea media',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'cable',
+            gifFile: 'pectorals/cable-middle-fly.gif',
+            illustration: 'cable-fly',
+            formGuide:
+              'Poleas a la altura del pecho, paso adelante para estabilidad. Junta las manos al frente en arco amplio. Mantén ligera flexión de codo.',
+          },
+          {
+            equipment: 'cable',
+            gifFile: 'pectorals/cable-standing-fly.gif',
+            illustration: 'cable-fly',
+            formGuide:
+              'De pie entre poleas medias. Abre y cierra los brazos con el pecho alto. Controla la fase excéntrica sin dejar que el peso te abra de golpe.',
+          },
+        ],
+      },
+      {
+        name: 'Press inclinado en máquina',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'pectorals/lever-incline-chest-press.gif',
+            illustration: 'incline-press',
+            formGuide:
+              'Espalda pegada al respaldo, banco a 30-45°. Empuja los agarres hacia arriba y adelante. Aprieta el pecho superior al final del recorrido.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -157,6 +213,55 @@ export const muscles: Muscle[] = [
           },
         ],
       },
+      {
+        name: 'Press plano con barra',
+        sets: '4',
+        reps: '8-12',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'pectorals/barbell-bench-press.gif',
+            illustration: 'decline-press',
+            formGuide:
+              'Banco plano, agarre al ancho de hombros. Baja la barra al pecho con codos a 45°. Empuja en línea recta apretando el pecho al final.',
+          },
+          {
+            equipment: 'dumbbell',
+            gifFile: 'pectorals/dumbbell-bench-press.gif',
+            illustration: 'decline-press',
+            formGuide:
+              'Mancuernas en banco plano. Baja hasta sentir estiramiento en el pecho. Empuja convergiendo sin perder control de los hombros.',
+          },
+        ],
+      },
+      {
+        name: 'Pullover con mancuerna',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'pectorals/dumbbell-pullover.gif',
+            illustration: 'cable-fly',
+            formGuide:
+              'Acostado en banco, mancuerna sujeta con ambas manos. Baja el peso detrás de la cabeza con codos semiflexionados. Sube en arco hasta el pecho.',
+          },
+        ],
+      },
+      {
+        name: 'Press en declive en máquina',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'pectorals/lever-decline-chest-press.gif',
+            illustration: 'decline-press',
+            formGuide:
+              'Ajusta el asiento para que los agarres queden a la altura del pecho inferior. Empuja sin bloquear los codos. Controla la bajada en 2-3 segundos.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -225,6 +330,62 @@ export const muscles: Muscle[] = [
             illustration: 'overhead-press',
             formGuide:
               'Inicia con palmas hacia ti a la altura del mentón. Rota las muñecas mientras empujas arriba. Invierte al bajar.',
+          },
+        ],
+      },
+      {
+        name: 'Press militar de pie',
+        sets: '4',
+        reps: '8-12',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'delts/dumbbell-standing-overhead-press.gif',
+            illustration: 'overhead-press',
+            formGuide:
+              'De pie con core firme. Empuja las mancuernas por encima de la cabeza sin arquear la lumbar. Baja hasta la altura de las orejas.',
+          },
+          {
+            equipment: 'barbell',
+            gifFile: 'delts/barbell-seated-overhead-press.gif',
+            illustration: 'overhead-press',
+            formGuide:
+              'Barra desde el pecho alto, de pie. Empuja vertical con glúteos y abdomen apretados. No uses impulso de las piernas.',
+          },
+        ],
+      },
+      {
+        name: 'Elevaciones frontales con barra',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'delts/barbell-front-raise.gif',
+            illustration: 'front-raise',
+            formGuide:
+              'Agarre al ancho de hombros, brazos casi rectos. Eleva la barra al frente hasta la altura de los hombros. Baja lento sin balancear.',
+          },
+        ],
+      },
+      {
+        name: 'Push press',
+        sets: '3',
+        reps: '8-10',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'delts/dumbbell-push-press.gif',
+            illustration: 'overhead-press',
+            formGuide:
+              'Flexiona ligeramente las rodillas y empuja el peso arriba usando impulso controlado de piernas. Bloquea arriba con brazos extendidos.',
+          },
+          {
+            equipment: 'machine',
+            gifFile: 'delts/lever-military-press.gif',
+            illustration: 'overhead-press',
+            formGuide:
+              'En máquina de press militar. Empuja con fuerza desde el pecho alto. Mantén la espalda apoyada en el respaldo.',
           },
         ],
       },
@@ -307,6 +468,63 @@ export const muscles: Muscle[] = [
           },
         ],
       },
+      {
+        name: 'Curl inclinado',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'biceps/dumbbell-incline-curl.gif',
+            illustration: 'bicep-curl',
+            formGuide:
+              'Banco inclinado 45°, brazos colgando. Sube sin mover los codos adelante. Enfatiza la cabeza larga del bíceps.',
+            tip: 'Estira bien la cabeza larga',
+          },
+          {
+            equipment: 'dumbbell',
+            gifFile: 'biceps/dumbbell-prone-incline-curl.gif',
+            illustration: 'bicep-curl',
+            formGuide:
+              'Pecho apoyado en banco inclinado. Flexiona con codos fijos detrás del cuerpo. Controla la bajada sin dejar caer el peso.',
+          },
+        ],
+      },
+      {
+        name: 'Curl concentrado',
+        sets: '3',
+        reps: '12-15 por brazo',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'biceps/dumbbell-concentration-curl.gif',
+            illustration: 'bicep-curl',
+            formGuide:
+              'Sentado, codo apoyado en el muslo interno. Sube la mancuerna sin balancear el torso. Aprieta el bíceps arriba 1 segundo.',
+          },
+          {
+            equipment: 'cable',
+            gifFile: 'biceps/cable-concentration-curl.gif',
+            illustration: 'bicep-curl',
+            formGuide:
+              'Polea baja, inclinado con codo fijo contra la rodilla. Flexiona hasta máxima contracción. La polea mantiene tensión constante.',
+          },
+        ],
+      },
+      {
+        name: 'Curl en máquina Scott',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'biceps/lever-preacher-curl.gif',
+            illustration: 'preacher-curl',
+            formGuide:
+              'Brazos apoyados en el banco Scott de la máquina. Flexiona sin despegar los codos del apoyo. Baja lento hasta casi extender.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -362,6 +580,48 @@ export const muscles: Muscle[] = [
             illustration: 'hammer-curl',
             formGuide:
               'Agarre neutro, codos fijos. Trabaja braquiorradial y antebrazo. Alterna o simultáneo.',
+          },
+        ],
+      },
+      {
+        name: 'Curl de muñeca en polea',
+        sets: '3',
+        reps: '15-20',
+        variants: [
+          {
+            equipment: 'cable',
+            gifFile: 'forearms/cable-wrist-curl.gif',
+            illustration: 'bicep-curl',
+            formGuide:
+              'Sentado frente a polea baja, antebrazos apoyados en los muslos. Flexiona la muñeca subiendo el agarre. Baja controlado.',
+          },
+        ],
+      },
+      {
+        name: 'Curl de muñeca inverso con mancuerna',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'forearms/dumbbell-reverse-wrist-curl.gif',
+            illustration: 'bicep-curl',
+            formGuide:
+              'Antebrazos apoyados, palmas hacia abajo. Extiende la muñeca hacia arriba trabajando los extensores del antebrazo.',
+          },
+        ],
+      },
+      {
+        name: 'Curl de muñeca inverso en polea',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'cable',
+            gifFile: 'forearms/cable-reverse-wrist-curl.gif',
+            illustration: 'bicep-curl',
+            formGuide:
+              'Polea baja con agarre prono. Flexiona la muñeca hacia arriba con antebrazos apoyados. Tensión constante en todo el recorrido.',
           },
         ],
       },
@@ -450,6 +710,48 @@ export const muscles: Muscle[] = [
           },
         ],
       },
+      {
+        name: 'Sit-up en banco declinado',
+        sets: '3',
+        reps: '12-20',
+        variants: [
+          {
+            equipment: 'bodyweight',
+            gifFile: 'abs/decline-sit-up.gif',
+            illustration: 'cable-crunch',
+            formGuide:
+              'Pies anclados en banco declinado. Flexiona el tronco subiendo los hombros. Baja controlado sin dejar caer el peso de la cabeza.',
+          },
+        ],
+      },
+      {
+        name: 'Crunch en banco declinado',
+        sets: '3',
+        reps: '15-20',
+        variants: [
+          {
+            equipment: 'bodyweight',
+            gifFile: 'abs/decline-crunch.gif',
+            illustration: 'cable-crunch',
+            formGuide:
+              'Banco declinado, manos cruzadas en el pecho. Eleva los hombros sin tirar del cuello. Exhala al subir y aprieta el abdomen.',
+          },
+        ],
+      },
+      {
+        name: 'Rodillas al pecho colgado',
+        sets: '3',
+        reps: '10-15',
+        variants: [
+          {
+            equipment: 'bodyweight',
+            gifFile: 'abs/hanging-oblique-knee-raise.gif',
+            illustration: 'hanging-leg-raise',
+            formGuide:
+              'Cuelga con hombros activos. Lleva las rodillas al pecho sin balanceo. Baja lento manteniendo tensión en el core.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -532,6 +834,48 @@ export const muscles: Muscle[] = [
             illustration: 'bicycle-crunch',
             formGuide:
               'Manos detrás de la cabeza sin tirar del cuello. Lleva el codo al rodillo contrario. Extensión completa de la pierna que baja.',
+          },
+        ],
+      },
+      {
+        name: 'Wood chop con landmine',
+        sets: '3',
+        reps: '12 por lado',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'abs/landmine-180.gif',
+            illustration: 'oblique-crunch',
+            formGuide:
+              'Barra anclada en landmine. Rota el tronco llevando el peso de arriba a abajo en diagonal. La fuerza sale de los oblicuos, no de los brazos.',
+          },
+        ],
+      },
+      {
+        name: 'Crunch oblicuo en suelo',
+        sets: '3',
+        reps: '15 por lado',
+        variants: [
+          {
+            equipment: 'bodyweight',
+            gifFile: 'abs/oblique-crunch-v-2.gif',
+            illustration: 'oblique-crunch',
+            formGuide:
+              'Acostado, rodillas flexionadas a un lado. Eleva el hombro contrario hacia la rodilla. Aprieta el oblicuo en cada repetición.',
+          },
+        ],
+      },
+      {
+        name: 'Crunch oblicuo de pie en polea',
+        sets: '3',
+        reps: '12-15 por lado',
+        variants: [
+          {
+            equipment: 'cable',
+            gifFile: 'abs/cable-standing-crunch.gif',
+            illustration: 'oblique-crunch',
+            formGuide:
+              'De lado a la polea alta. Flexiona el tronco llevando el codo hacia la cadera opuesta. Mantén la cadera quieta durante todo el movimiento.',
           },
         ],
       },
@@ -620,6 +964,55 @@ export const muscles: Muscle[] = [
           },
         ],
       },
+      {
+        name: 'Sentadilla sissy',
+        sets: '3',
+        reps: '10-15',
+        variants: [
+          {
+            equipment: 'bodyweight',
+            gifFile: 'quads/sissy-squat.gif',
+            illustration: 'squat',
+            formGuide:
+              'Inclínate hacia atrás manteniendo rodillas adelante. Baja hasta sentir estiramiento en cuádriceps. Sube apretando el muslo frontal.',
+          },
+        ],
+      },
+      {
+        name: 'Subida al cajón',
+        sets: '3',
+        reps: '10 por pierna',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'glutes/dumbbell-step-up.gif',
+            illustration: 'lunge',
+            formGuide:
+              'Cajón a la altura de la rodilla. Sube con todo el pie apoyado y empuja con el talón. Baja controlado sin impulso de la pierna trasera.',
+          },
+          {
+            equipment: 'barbell',
+            gifFile: 'glutes/barbell-step-up.gif',
+            illustration: 'lunge',
+            formGuide:
+              'Barra en la espalda, sube al cajón con una pierna. Mantén el torso erguido. Alterna piernas con ritmo constante.',
+          },
+        ],
+      },
+      {
+        name: 'Sentadilla overhead',
+        sets: '3',
+        reps: '8-10',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'quads/barbell-overhead-squat.gif',
+            illustration: 'squat',
+            formGuide:
+              'Barra extendida sobre la cabeza con brazos bloqueados. Baja en sentadilla manteniendo el torso erguido. Core firme durante todo el recorrido.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -698,6 +1091,48 @@ export const muscles: Muscle[] = [
           },
         ],
       },
+      {
+        name: 'Elevaciones posteriores en banco inclinado',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'delts/dumbbell-incline-rear-lateral-raise.gif',
+            illustration: 'rear-fly',
+            formGuide:
+              'Pecho apoyado en banco inclinado. Abre los brazos lateralmente hasta la altura de los hombros. Aprieta escápulas arriba.',
+          },
+        ],
+      },
+      {
+        name: 'Remo en polea agarre amplio',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'cable',
+            gifFile: 'upper-back/cable-seated-wide-grip-row.gif',
+            illustration: 'seated-row',
+            formGuide:
+              'Sentado con agarre amplio. Tira al pecho alto llevando los codos hacia atrás. Enfatiza deltoides posterior y espalda media.',
+          },
+        ],
+      },
+      {
+        name: 'Remo a un brazo inclinado',
+        sets: '3',
+        reps: '12 por brazo',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'upper-back/dumbbell-one-arm-bent-over-row.gif',
+            illustration: 'inverted-row',
+            formGuide:
+              'Inclinado con espalda plana, mano libre apoyada. Tira la mancuerna hacia la cadera apretando el deltoides posterior al final.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -773,6 +1208,48 @@ export const muscles: Muscle[] = [
             illustration: 'farmer-walk',
             formGuide:
               'Usa la barra como carga para caminar (trap bar si está disponible). Postura erguida, pasos firmes.',
+          },
+        ],
+      },
+      {
+        name: 'Encogimientos en máquina',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'traps/lever-shrug.gif',
+            illustration: 'shrug',
+            formGuide:
+              'Hombros bajo las almohadillas de la máquina. Eleva los hombros recto hacia arriba. Pausa arriba y baja lento.',
+          },
+        ],
+      },
+      {
+        name: 'Remo Pendlay',
+        sets: '4',
+        reps: '6-8',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'upper-back/barbell-pendlay-row.gif',
+            illustration: 'barbell-row',
+            formGuide:
+              'Barra en el suelo entre repeticiones. Torso paralelo al suelo. Tira explosivo al abdomen y baja la barra con control.',
+          },
+        ],
+      },
+      {
+        name: 'Face pull',
+        sets: '3',
+        reps: '15-20',
+        variants: [
+          {
+            equipment: 'cable',
+            gifFile: 'delts/cable-standing-face-pull.gif',
+            illustration: 'face-pull',
+            formGuide:
+              'Cuerda a la altura del rostro. Tira hacia la frente separando las manos. Codos altos, escápulas juntas al final del recorrido.',
           },
         ],
       },
@@ -875,6 +1352,48 @@ export const muscles: Muscle[] = [
           },
         ],
       },
+      {
+        name: 'Jalón al pecho agarre supino',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'cable',
+            gifFile: 'lats/cable-underhand-pulldown.gif',
+            illustration: 'lat-pulldown',
+            formGuide:
+              'Agarre supino al ancho de hombros. Tira la barra al pecho alto llevando los codos hacia abajo. Aprieta dorsales al final.',
+          },
+        ],
+      },
+      {
+        name: 'Pullover en polea',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'cable',
+            gifFile: 'lats/cable-straight-arm-pulldown.gif',
+            illustration: 'lat-pulldown',
+            formGuide:
+              'Brazos casi rectos, ligera flexión de codo fija. Empuja la barra hacia abajo en arco amplio. El movimiento sale de los dorsales, no de los tríceps.',
+          },
+        ],
+      },
+      {
+        name: 'Remo con mancuerna a un brazo',
+        sets: '3',
+        reps: '10-12 por brazo',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'upper-back/dumbbell-one-arm-bent-over-row.gif',
+            illustration: 'barbell-row',
+            formGuide:
+              'Rodilla y mano apoyadas en banco. Tira la mancuerna al costado apretando el dorsal. Codo pegado al cuerpo al subir.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -957,6 +1476,55 @@ export const muscles: Muscle[] = [
             illustration: 'tricep-kickback',
             formGuide:
               'Polea baja, inclinado hacia adelante. Extiende el brazo hacia atrás manteniendo el codo alto y fijo.',
+          },
+        ],
+      },
+      {
+        name: 'Fondos en paralelas',
+        sets: '3',
+        reps: '8-12',
+        variants: [
+          {
+            equipment: 'bodyweight',
+            gifFile: 'triceps/triceps-dip.gif',
+            illustration: 'bench-dip',
+            formGuide:
+              'Torso erguido para enfatizar tríceps. Baja hasta 90° en los codos. Empuja sin balanceo ni abrir los codos.',
+          },
+        ],
+      },
+      {
+        name: 'Press cerrado',
+        sets: '4',
+        reps: '8-10',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'triceps/barbell-close-grip-bench-press.gif',
+            illustration: 'skull-crusher',
+            formGuide:
+              'Agarre al ancho de hombros en banco plano. Baja la barra al pecho manteniendo los codos pegados al cuerpo. Empuja enfocando el tríceps.',
+          },
+        ],
+      },
+      {
+        name: 'Extensión de tríceps por encima de la cabeza',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'triceps/dumbbell-standing-triceps-extension.gif',
+            illustration: 'skull-crusher',
+            formGuide:
+              'De pie o sentado, mancuerna con ambas manos detrás de la cabeza. Extiende los codos sin mover los hombros. Baja controlado.',
+          },
+          {
+            equipment: 'cable',
+            gifFile: 'triceps/cable-incline-triceps-extension.gif',
+            illustration: 'tricep-pushdown',
+            formGuide:
+              'Polea baja detrás de ti, inclinado hacia adelante. Extiende los brazos hacia adelante. Enfatiza la cabeza larga del tríceps.',
           },
         ],
       },
@@ -1052,6 +1620,55 @@ export const muscles: Muscle[] = [
           },
         ],
       },
+      {
+        name: 'Peso muerto convencional',
+        sets: '4',
+        reps: '5-8',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'glutes/barbell-deadlift.gif',
+            illustration: 'romanian-deadlift',
+            formGuide:
+              'Pies al ancho de cadera, agarre mixto o doble prono. Empuja el suelo con las piernas y extiende cadera al subir. Espalda neutra en todo momento.',
+          },
+        ],
+      },
+      {
+        name: 'Abducción de cadera en máquina',
+        sets: '3',
+        reps: '15-20',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'abductors/lever-seated-hip-abduction.gif',
+            illustration: 'glute-kickback',
+            formGuide:
+              'Sentado en máquina de abducción. Abre las piernas contra la resistencia. Aprieta el glúteo medio al final del recorrido.',
+          },
+        ],
+      },
+      {
+        name: 'Subida al cajón con barra',
+        sets: '3',
+        reps: '8 por pierna',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'glutes/barbell-step-up.gif',
+            illustration: 'bulgarian-split',
+            formGuide:
+              'Barra en la espalda alta. Sube al cajón con una pierna empujando con el glúteo. Baja controlado sin impulso.',
+          },
+          {
+            equipment: 'dumbbell',
+            gifFile: 'glutes/dumbbell-step-up.gif',
+            illustration: 'bulgarian-split',
+            formGuide:
+              'Mancuernas a los lados. Paso completo sobre el cajón. Mantén el torso erguido y el core activo.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -1137,6 +1754,48 @@ export const muscles: Muscle[] = [
           },
         ],
       },
+      {
+        name: 'Curl femoral sentado',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'hamstrings/lever-seated-leg-curl.gif',
+            illustration: 'leg-curl',
+            formGuide:
+              'Sentado con rodillas al borde del asiento. Flexiona llevando los talones hacia abajo. Aprieta isquios arriba y baja lento.',
+          },
+        ],
+      },
+      {
+        name: 'Curl femoral de rodillas',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'hamstrings/lever-kneeling-leg-curl.gif',
+            illustration: 'leg-curl',
+            formGuide:
+              'De rodillas en la máquina, tobillos anclados. Flexiona llevando los talones al glúteo. Mantén las caderas extendidas.',
+          },
+        ],
+      },
+      {
+        name: 'Elevación glúteo-isquio (GHR)',
+        sets: '3',
+        reps: '8-12',
+        variants: [
+          {
+            equipment: 'bodyweight',
+            gifFile: 'hamstrings/glute-ham-raise.gif',
+            illustration: 'nordic-curl',
+            formGuide:
+              'Rodillas apoyadas en la plataforma, tobillos fijos. Baja el torso con control y sube usando isquios y glúteos. No arquees la espalda.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -1219,6 +1878,55 @@ export const muscles: Muscle[] = [
             illustration: 'calf-jump',
             formGuide:
               'Pies al ancho de cadera. Salta usando solo los tobillos, rodillas casi fijas. Aterriza suave en la punta del pie.',
+          },
+        ],
+      },
+      {
+        name: 'Elevación de talones a una pierna',
+        sets: '3',
+        reps: '12-15 por pierna',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'calves/dumbbell-single-leg-calf-raise.gif',
+            illustration: 'calf-raise',
+            formGuide:
+              'Un pie en escalón, mancuerna en la mano del mismo lado. Sube lo más alto posible y baja hasta estirar. Alterna piernas.',
+          },
+        ],
+      },
+      {
+        name: 'Elevación de talones tipo burro',
+        sets: '3',
+        reps: '15-20',
+        variants: [
+          {
+            equipment: 'bodyweight',
+            gifFile: 'calves/donkey-calf-raise.gif',
+            illustration: 'calf-raise',
+            formGuide:
+              'Inclinado con apoyo en banco, pies en escalón. Eleva los talones al máximo. Rango completo sin rebotes.',
+          },
+          {
+            equipment: 'machine',
+            gifFile: 'calves/lever-donkey-calf-raise.gif',
+            illustration: 'calf-raise',
+            formGuide:
+              'Máquina de elevación tipo burro. Empuja con los talones hasta la máxima contracción. Controla la bajada en 2-3 segundos.',
+          },
+        ],
+      },
+      {
+        name: 'Prensa de pantorrillas en máquina',
+        sets: '3',
+        reps: '15-20',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'calves/lever-calf-press.gif',
+            illustration: 'calf-press',
+            formGuide:
+              'Solo la punta de los pies en la plataforma. Empuja con los talones sin flexionar las rodillas. Pausa arriba en cada repetición.',
           },
         ],
       },
