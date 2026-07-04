@@ -4,6 +4,7 @@ import './AppNav.css'
 interface AppNavProps {
   section: AppSection
   onSectionChange: (section: AppSection) => void
+  routineCount?: number
 }
 
 const SECTIONS: Array<{ id: AppSection; label: string }> = [
@@ -13,7 +14,7 @@ const SECTIONS: Array<{ id: AppSection; label: string }> = [
   { id: 'progress', label: 'Progreso' },
 ]
 
-export function AppNav({ section, onSectionChange }: AppNavProps) {
+export function AppNav({ section, onSectionChange, routineCount = 0 }: AppNavProps) {
   return (
     <nav className="app-nav" aria-label="Secciones principales">
       {SECTIONS.map(({ id, label }) => (
@@ -25,6 +26,11 @@ export function AppNav({ section, onSectionChange }: AppNavProps) {
           onClick={() => onSectionChange(id)}
         >
           {label}
+          {id === 'routines' && routineCount > 0 && (
+            <span className="app-nav__badge" aria-label={`${routineCount} ejercicios en rutina`}>
+              {routineCount}
+            </span>
+          )}
         </button>
       ))}
     </nav>

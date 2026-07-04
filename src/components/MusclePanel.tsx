@@ -3,7 +3,7 @@ import { ExerciseCard } from './ExerciseCard'
 import { ExerciseHistoryView } from './ExerciseHistoryView'
 import { formatLastTrained, getMuscleRecovery, RECOVERY_LABELS } from '../lib/analytics'
 import { exerciseKey } from '../lib/exerciseKey'
-import { loadFavorites, toggleFavorite } from '../lib/trainingStorage'
+import { loadFavorites, addToDayRoutine, loadDayRoutine, toggleFavorite } from '../lib/trainingStorage'
 import type { Equipment, ExerciseFocus, Muscle, MuscleHead } from '../types'
 import './MusclePanel.css'
 
@@ -16,6 +16,8 @@ interface MusclePanelProps {
   refreshKey?: number
   onOpenDetail?: () => void
   onStartRoutine?: (muscleId: string) => void
+  onDayRoutineChange?: () => void
+  onGoToWorkout?: () => void
 }
 
 export function MusclePanel({
@@ -27,9 +29,17 @@ export function MusclePanel({
   refreshKey = 0,
   onOpenDetail,
   onStartRoutine,
+  onDayRoutineChange,
+  onGoToWorkout,
 }: MusclePanelProps) {
   const listRef = useRef<HTMLUListElement>(null)
   const [favorites, setFavorites] = useState<Set<string>>(() => loadFavorites())
+  const [routineKeys, setRoutineKeys] = useState<Set<string>>(() => {
+    return new Set(
+      loadDayRoutine().map((i) => exerciseKey(i.muscleId, i.exerciseName, i.equipment)),
+    )
+  })
+  const [addMsg, setAddMsg] = useState<string | null>(null)
   const [historyTarget, setHistoryTarget] = useState<{
     exerciseName: string
     equipment: Equipment
@@ -37,6 +47,11 @@ export function MusclePanel({
 
   useEffect(() => {
     setFavorites(loadFavorites())
+    setRoutineKeys(
+      new Set(
+        loadDayRoutine().map((i) => exerciseKey(i.muscleId, i.exerciseName, i.equipment)),
+      ),
+    )
   }, [refreshKey, muscle?.id])
 
   useEffect(() => {
@@ -69,6 +84,29 @@ export function MusclePanel({
     toggleFavorite(key)
     setFavorites(loadFavorites())
   }
+
+  function handleAddToRoutine(exerciseName: string, equipment: Equipment, sets: string, reps: string) {
+    if (!muscle) return
+    const added = addToDayRoutine({
+      muscleId: muscle.id,
+      exerciseName,
+      equipment,
+      sets,
+      reps,
+    })
+    if (added) {
+      const key = exerciseKey(muscle.id, exerciseName, equipment)
+      setRoutineKeys((prev) => new Set([...prev, key]))
+      setAddMsg(`${exerciseName} agregado a tu rutina del día`)
+      onDayRoutineChange?.()
+    }
+  }
+
+  useEffect(() => {
+    if (!addMsg) return
+    const t = window.setTimeout(() => setAddMsg(null), 2500)
+    return () => window.clearTimeout(t)
+  }, [addMsg])
 
   if (!muscle) {
     return (
@@ -143,6 +181,19 @@ export function MusclePanel({
           )}
         </div>
 
+        {routineKeys.size > 0 && onGoToWorkout && (
+          <div className="muscle-panel__routine-banner">
+            <span>
+              {routineKeys.size} ejercicio{routineKeys.size === 1 ? '' : 's'} en tu rutina del día
+            </span>
+            <button type="button" className="muscle-panel__routine-go" onClick={onGoToWorkout}>
+              Ir a Entrenar
+            </button>
+          </div>
+        )}
+
+        {addMsg && <p className="muscle-panel__toast">{addMsg}</p>}
+
         {activeHead && <p className="muscle-panel__desc">{activeHead.description}</p>}
         {!activeHead && <p className="muscle-panel__desc">{muscle.description}</p>}
       </header>
@@ -167,8 +218,10 @@ export function MusclePanel({
                 isFavorite={exercise.variants.some((v) =>
                   favorites.has(exerciseKey(muscle.id, exercise.name, v.equipment)),
                 )}
+                isInRoutine={(eq) => routineKeys.has(exerciseKey(muscle.id, exercise.name, eq))}
                 onToggleFavorite={(eq) => handleToggleFavorite(exercise.name, eq)}
                 onViewHistory={(eq) => setHistoryTarget({ exerciseName: exercise.name, equipment: eq })}
+                onAddToRoutine={(eq) => handleAddToRoutine(exercise.name, eq, exercise.sets, exercise.reps)}
               />
             )
           })}

@@ -1,16 +1,18 @@
 import { useMemo, type MouseEvent, type PointerEvent } from 'react'
 import type { MuscleGroup, MuscleMapValues } from '@musclemap/core'
 import { getVisibleMuscleGroups } from '@musclemap/core'
-import { getBodyDiagram } from '@musclemap/assets'
 import maleFront from '@musclemap/assets/bodies/male-front.webp'
 import maleBack from '@musclemap/assets/bodies/male-back.webp'
-import { BodyFigure } from '@musclemap/react'
+import { BodyFigure, type PartValues } from '@musclemap/react'
 import type { MuscleHead } from '../types'
 import { getMuscleDetail, hasClickableHeads } from '../data/muscleHeads'
 import { muscleMap } from '../data/muscles'
+import { getAtlasBodyDiagram } from '../lib/chestDiagram'
 import {
+  buildChestPartValues,
   getDetailCropViewBox,
   getMuscleDetailMmConfig,
+  highlightChestParts,
   MUSCLE_HIGHLIGHT_COLOR,
 } from '../lib/muscleMapBridge'
 import './MuscleDetailView.css'
@@ -120,7 +122,7 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
 
   const diagram = useMemo(() => {
     if (!mmConfig) return null
-    return getBodyDiagram('MALE', mmConfig.view === 'FRONT' ? 'FRONT' : 'BACK')
+    return getAtlasBodyDiagram('MALE', mmConfig.view === 'FRONT' ? 'FRONT' : 'BACK')
   }, [mmConfig])
 
   const mirrorCenterX = useMemo(() => {
@@ -135,8 +137,15 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
 
   const backgroundValues = useMemo((): MuscleMapValues => {
     if (!mmConfig) return {}
+    if (mmConfig.group === 'CHEST') return {}
     return { [mmConfig.group]: { score: 28 } }
   }, [mmConfig])
+
+  const chestPartValues = useMemo((): PartValues => {
+    if (mmConfig?.group !== 'CHEST') return {}
+    const base = buildChestPartValues(() => 28)
+    return highlightChestParts(base, muscleId, 88)
+  }, [mmConfig, muscleId])
 
   return (
     <div className="muscle-detail">
@@ -162,6 +171,7 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
               diagram={diagram}
               cropViewBox={cropViewBox}
               values={backgroundValues}
+              partValues={chestPartValues}
               colorModel="LOAD"
               monochromeColor={MUSCLE_HIGHLIGHT_COLOR}
               monochromeBaseColor="#9ca3af"

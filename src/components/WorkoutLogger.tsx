@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { muscles } from '../data/muscles'
 import { buildWorkoutPlan } from '../lib/routines'
-import { saveSession } from '../lib/trainingStorage'
+import { saveSession, loadDayRoutine, clearDayRoutine, removeFromDayRoutine, loadFavorites } from '../lib/trainingStorage'
 import { muscleMatchesBodyHalf } from '../lib/bodyHalf'
-import { loadFavorites } from '../lib/trainingStorage'
 import { exerciseKey } from '../lib/exerciseKey'
 import { EQUIPMENT_LABELS } from '../types'
-import type { BodyHalfFilter, Equipment, LoggedExercise, LoggedSet, PersonalRecord } from '../types'
+import type { BodyHalfFilter, DayRoutineItem, Equipment, LoggedExercise, LoggedSet, PersonalRecord } from '../types'
 import { BodyHalfFilterBar } from './BodyHalfFilter'
 import './WorkoutLogger.css'
 
@@ -15,12 +14,33 @@ interface WorkoutLoggerProps {
   onBodyHalfChange: (filter: BodyHalfFilter) => void
   onWorkoutSaved?: (newPrs: PersonalRecord[]) => void
   initialMuscleIds?: string[]
+  routineRefreshKey?: number
+  onRoutineChange?: () => void
 }
 
 const MAX_MUSCLES = 3
 
 function emptySet(): LoggedSet {
   return { weightKg: 0, reps: 0, restSec: 90 }
+}
+
+function dayRoutineToLogged(items: DayRoutineItem[]): LoggedExercise[] {
+  return items.map((item) => {
+    const setCount = parseInt(item.sets, 10) || 3
+    const repNum = parseInt(item.reps.split('-')[0], 10) || 10
+    return {
+      id: crypto.randomUUID(),
+      muscleId: item.muscleId,
+      exerciseName: item.exerciseName,
+      equipment: item.equipment,
+      sets: Array.from({ length: setCount }, () => ({ weightKg: 0, reps: repNum, restSec: 90 })),
+      notes: '',
+    }
+  })
+}
+
+function muscleIdsFromExercises(exercises: LoggedExercise[]): string[] {
+  return [...new Set(exercises.map((e) => e.muscleId))]
 }
 
 function planToLogged(plan: ReturnType<typeof buildWorkoutPlan>): LoggedExercise[] {
@@ -43,23 +63,62 @@ export function WorkoutLogger({
   onBodyHalfChange,
   onWorkoutSaved,
   initialMuscleIds = [],
+  routineRefreshKey = 0,
+  onRoutineChange,
 }: WorkoutLoggerProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>(initialMuscleIds)
   const [dayLabel, setDayLabel] = useState('')
   const [exercises, setExercises] = useState<LoggedExercise[]>([])
+  const [fromDayRoutine, setFromDayRoutine] = useState(false)
   const [savedMsg, setSavedMsg] = useState<string | null>(null)
   const [newPrs, setNewPrs] = useState<PersonalRecord[]>([])
 
   const favorites = useMemo(() => loadFavorites(), [savedMsg])
+  const draftCount = useMemo(() => loadDayRoutine().length, [routineRefreshKey, savedMsg])
 
   useEffect(() => {
+    const draft = loadDayRoutine()
+    if (draft.length > 0) {
+      const logged = dayRoutineToLogged(draft)
+      setExercises(logged)
+      setSelectedIds(muscleIdsFromExercises(logged))
+      setFromDayRoutine(true)
+      return
+    }
     if (initialMuscleIds.length === 0) return
     setSelectedIds(initialMuscleIds)
     const plan = buildWorkoutPlan(initialMuscleIds, dayLabel)
     setExercises(planToLogged(plan))
+    setFromDayRoutine(false)
     // Solo al montar con músculos preseleccionados desde Explorar
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useEffect(() => {
+    const draft = loadDayRoutine()
+    if (draft.length === 0) return
+
+    setExercises((prev) => {
+      if (prev.length === 0) return dayRoutineToLogged(draft)
+
+      const existingKeys = new Set(
+        prev.map((e) => exerciseKey(e.muscleId, e.exerciseName, e.equipment)),
+      )
+      const newItems = draft.filter(
+        (item) => !existingKeys.has(exerciseKey(item.muscleId, item.exerciseName, item.equipment)),
+      )
+      if (newItems.length === 0) return prev
+      return [...prev, ...dayRoutineToLogged(newItems)]
+    })
+    setFromDayRoutine(true)
+    setSavedMsg(null)
+    setNewPrs([])
+  }, [routineRefreshKey])
+
+  useEffect(() => {
+    if (exercises.length === 0) return
+    setSelectedIds(muscleIdsFromExercises(exercises))
+  }, [exercises])
 
   const availableMuscles = useMemo(
     () => muscles.filter((m) => muscleMatchesBodyHalf(m.id, bodyHalfFilter)),
@@ -81,8 +140,33 @@ export function WorkoutLogger({
     if (selectedIds.length === 0) return
     const plan = buildWorkoutPlan(selectedIds, dayLabel)
     setExercises(planToLogged(plan))
+    setFromDayRoutine(false)
     setSavedMsg(null)
     setNewPrs([])
+  }
+
+  function handleClearRoutine() {
+    clearDayRoutine()
+    setExercises([])
+    setSelectedIds([])
+    setFromDayRoutine(false)
+    setDayLabel('')
+    setSavedMsg(null)
+    setNewPrs([])
+    onRoutineChange?.()
+  }
+
+  function removeExercise(exId: string) {
+    setExercises((prev) => {
+      const next = prev.filter((ex) => ex.id !== exId)
+      const removed = prev.find((ex) => ex.id === exId)
+      if (removed && fromDayRoutine) {
+        removeFromDayRoutine(exerciseKey(removed.muscleId, removed.exerciseName, removed.equipment))
+        onRoutineChange?.()
+      }
+      setSelectedIds(muscleIdsFromExercises(next))
+      return next
+    })
   }
 
   function updateSet(exId: string, setIdx: number, field: keyof LoggedSet, value: number) {
@@ -129,16 +213,19 @@ export function WorkoutLogger({
       id: crypto.randomUUID(),
       date: new Date().toISOString().slice(0, 10),
       label,
-      muscleIds: selectedIds,
+      muscleIds: muscleIdsFromExercises(exercises),
       exercises,
       completedAt: new Date().toISOString(),
     }
     const prs = saveSession(session)
     setNewPrs(prs)
     setSavedMsg(`Entrenamiento guardado — ${exercises.length} ejercicios, ${prs.length} PR${prs.length === 1 ? '' : 's'} nuevo${prs.length === 1 ? '' : 's'}.`)
+    clearDayRoutine()
+    setFromDayRoutine(false)
     setExercises([])
     setSelectedIds([])
     setDayLabel('')
+    onRoutineChange?.()
     onWorkoutSaved?.(prs)
   }
 
@@ -146,13 +233,19 @@ export function WorkoutLogger({
     <div className="workout-logger">
       <header className="workout-logger__header">
         <h2>Registrar entrenamiento</h2>
-        <p>Elegí músculos, armá la rutina y cargá peso, series y repeticiones.</p>
+        <p>Elegí ejercicios en Explorar o armá por músculos, y cargá peso, series y repeticiones.</p>
       </header>
 
       <BodyHalfFilterBar value={bodyHalfFilter} onChange={onBodyHalfChange} />
 
       {exercises.length === 0 ? (
         <>
+          {draftCount === 0 && (
+            <p className="workout-logger__hint">
+              Tip: en Explorar, cada ejercicio tiene el botón «Agregar a rutina del día».
+            </p>
+          )}
+
           <div className="workout-logger__picker">
             <p className="workout-logger__picker-label">
               Grupos: {selectedIds.length}/{MAX_MUSCLES}
@@ -200,13 +293,20 @@ export function WorkoutLogger({
       ) : (
         <section className="workout-logger__session">
           <div className="workout-logger__session-head">
-            <h3>{dayLabel.trim() || 'Sesión de hoy'}</h3>
+            <div>
+              <h3>{dayLabel.trim() || 'Rutina del día'}</h3>
+              {fromDayRoutine && (
+                <p className="workout-logger__session-source">
+                  {exercises.length} ejercicio{exercises.length === 1 ? '' : 's'} elegidos en Explorar
+                </p>
+              )}
+            </div>
             <button
               type="button"
               className="workout-logger__back"
-              onClick={() => setExercises([])}
+              onClick={handleClearRoutine}
             >
-              Cambiar músculos
+              {fromDayRoutine ? 'Limpiar rutina' : 'Cambiar músculos'}
             </button>
           </div>
 
@@ -224,17 +324,29 @@ export function WorkoutLogger({
                       {fav && <span className="workout-logger__fav" title="Favorito"> ★</span>}
                     </strong>
                   </div>
-                  <select
-                    className="workout-logger__equip"
-                    value={ex.equipment}
-                    onChange={(e) => updateEquipment(ex.id, e.target.value as Equipment)}
-                  >
-                    {(Object.keys(EQUIPMENT_LABELS) as Equipment[]).map((eq) => (
-                      <option key={eq} value={eq}>
-                        {EQUIPMENT_LABELS[eq]}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="workout-logger__ex-actions">
+                    <select
+                      className="workout-logger__equip"
+                      value={ex.equipment}
+                      onChange={(e) => updateEquipment(ex.id, e.target.value as Equipment)}
+                    >
+                      {(Object.keys(EQUIPMENT_LABELS) as Equipment[]).map((eq) => (
+                        <option key={eq} value={eq}>
+                          {EQUIPMENT_LABELS[eq]}
+                        </option>
+                      ))}
+                    </select>
+                    {fromDayRoutine && (
+                      <button
+                        type="button"
+                        className="workout-logger__remove-ex"
+                        onClick={() => removeExercise(ex.id)}
+                        aria-label="Quitar ejercicio"
+                      >
+                        Quitar
+                      </button>
+                    )}
+                  </div>
                 </header>
 
                 <table className="workout-logger__table">

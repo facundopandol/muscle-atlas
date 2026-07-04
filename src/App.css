@@ -1,13 +1,22 @@
 .app {
   min-height: 100svh;
+  width: 100%;
   padding: 2rem clamp(1rem, 4vw, 2.5rem) 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .app__header {
-  max-width: 720px;
-  margin-bottom: 2rem;
+  width: 100%;
+  max-width: var(--content-wide);
+  margin: 0 auto 2rem;
   position: relative;
   z-index: 10;
+}
+
+.app__header--narrow {
+  max-width: var(--content-narrow);
 }
 
 .app__eyebrow {
@@ -36,10 +45,23 @@
 }
 
 .app__main {
+  width: 100%;
+  max-width: var(--content-wide);
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(300px, 380px);
+  grid-template-columns: minmax(280px, 480px) minmax(300px, 380px);
   gap: 1.5rem;
   align-items: start;
+  justify-content: center;
+}
+
+.app__explore-toolbar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
 }
 
 .app__diagram-section {
@@ -47,6 +69,7 @@
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  width: 100%;
 }
 
 .view-controls {
@@ -119,16 +142,24 @@
 }
 
 .app__main--single {
+  max-width: var(--content-narrow);
   grid-template-columns: 1fr;
-  justify-items: center;
+  justify-items: stretch;
 }
 
 @media (max-width: 900px) {
   .app__main {
     grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .app__diagram-section {
+    max-width: 480px;
   }
 
   .muscle-panel {
+    width: 100%;
+    max-width: 480px;
     min-height: auto;
   }
 }

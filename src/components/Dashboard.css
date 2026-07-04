@@ -1,7 +1,5 @@
 .dashboard {
   width: 100%;
-  max-width: 640px;
-  margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -38,6 +36,8 @@
   padding: 1rem 0.85rem;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 0.25rem;
   box-shadow: var(--shadow);
 }
@@ -67,6 +67,7 @@
 .dashboard__actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.65rem;
 }
 

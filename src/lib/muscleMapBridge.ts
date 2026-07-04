@@ -1,7 +1,8 @@
 import type { MuscleGroup, MuscleMapRegion, MuscleMapView } from '@musclemap/core'
 import { MUSCLE_GROUP_META } from '@musclemap/core'
-import { getBodyDiagram } from '@musclemap/assets'
 import type { BodyView } from '../types'
+import type { PartValues } from '@musclemap/react'
+import { CHEST_PART_IDS, getAtlasBodyDiagram, type ChestPartId } from './chestDiagram'
 
 /** Etiquetas en español para tooltip MuscleMap. */
 export const MM_LABELS_ES: Partial<Record<MuscleGroup, string>> = {
@@ -28,8 +29,15 @@ export const MM_LABELS_ES: Partial<Record<MuscleGroup, string>> = {
   ABDUCTORS: 'Abductores',
 }
 
+/** Maps split chest surface ids to app muscle ids. */
+export const CHEST_PART_TO_MUSCLE: Record<ChestPartId, string> = {
+  CHEST_UPPER_LEFT: 'upper-chest',
+  CHEST_UPPER_RIGHT: 'upper-chest',
+  CHEST_LOWER_LEFT: 'lower-chest',
+  CHEST_LOWER_RIGHT: 'lower-chest',
+}
+
 const GROUP_TO_MUSCLE: Partial<Record<MuscleGroup, string>> = {
-  CHEST: 'upper-chest',
   SHOULDERS_FRONT: 'front-deltoid',
   SHOULDERS_SIDE: 'front-deltoid',
   SHOULDERS_REAR: 'rear-deltoid',
@@ -48,15 +56,23 @@ const GROUP_TO_MUSCLE: Partial<Record<MuscleGroup, string>> = {
   BACK_UPPER: 'trapezius',
 }
 
-/** Grupos que abren un sub-menú (varios músculos nuestros). */
-export const GROUPS_WITH_SUBMENU: Partial<Record<MuscleGroup, Array<{ muscleId: string; label: string }>>> = {
-  CHEST: [
-    { muscleId: 'upper-chest', label: 'Pectoral superior' },
-    { muscleId: 'lower-chest', label: 'Pectoral inferior' },
-  ],
+export function chestPartToMuscleId(partId?: string): string | null {
+  if (!partId) return null
+  return CHEST_PART_TO_MUSCLE[partId as ChestPartId] ?? null
 }
 
-export function mmGroupToMuscleId(group: MuscleGroup): string | null {
+export function muscleIdToChestParts(muscleId: string): ChestPartId[] {
+  if (muscleId === 'upper-chest') return ['CHEST_UPPER_LEFT', 'CHEST_UPPER_RIGHT']
+  if (muscleId === 'lower-chest') return ['CHEST_LOWER_LEFT', 'CHEST_LOWER_RIGHT']
+  return []
+}
+
+export function isChestPartId(partId: string): partId is ChestPartId {
+  return (CHEST_PART_IDS as readonly string[]).includes(partId)
+}
+
+export function mmGroupToMuscleId(group: MuscleGroup, partId?: string): string | null {
+  if (group === 'CHEST') return chestPartToMuscleId(partId)
   return GROUP_TO_MUSCLE[group] ?? null
 }
 
@@ -141,8 +157,32 @@ export function getMuscleDetailMmConfig(muscleId: string): MuscleDetailMmConfig 
 export function getDetailCropViewBox(muscleId: string): string | undefined {
   const mm = getMuscleDetailMmConfig(muscleId)
   if (!mm) return undefined
-  const diagram = getBodyDiagram('MALE', mm.view === 'FRONT' ? 'FRONT' : 'BACK')
+  const diagram = getAtlasBodyDiagram('MALE', mm.view === 'FRONT' ? 'FRONT' : 'BACK')
   return diagram.regionBox?.[mm.region]
+}
+
+/** Per-surface recovery/load values for split chest regions. */
+export function buildChestPartValues(
+  scoreForMuscle: (muscleId: string) => number,
+): PartValues {
+  const values: PartValues = {}
+  for (const partId of CHEST_PART_IDS) {
+    const muscleId = CHEST_PART_TO_MUSCLE[partId]
+    values[partId] = { score: scoreForMuscle(muscleId) }
+  }
+  return values
+}
+
+/** Highlight only the chest surfaces belonging to a muscle id. */
+export function highlightChestParts(base: PartValues, muscleId: string | null, score = 100): PartValues {
+  if (!muscleId) return base
+  const parts = muscleIdToChestParts(muscleId)
+  if (parts.length === 0) return base
+  const next = { ...base }
+  for (const partId of parts) {
+    next[partId] = { score }
+  }
+  return next
 }
 
 /** Color naranja tipo GIF de ejercicio. */

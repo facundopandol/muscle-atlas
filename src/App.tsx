@@ -12,6 +12,7 @@ import type { SearchResult } from './lib/searchIndex'
 import { muscleMatchesBodyHalf } from './lib/bodyHalf'
 import { getDefaultHeadId, getMuscleDetail } from './data/muscleHeads'
 import { muscleMap } from './data/muscles'
+import { getDayRoutineCount } from './lib/trainingStorage'
 import type { AppMode, AppSection, BodyHalfFilter, BodyView, ExerciseFocus } from './types'
 import './App.css'
 
@@ -24,7 +25,13 @@ function App() {
   const [hoveredMuscleId, setHoveredMuscleId] = useState<string | null>(null)
   const [exerciseFocus, setExerciseFocus] = useState<ExerciseFocus | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [routineRefreshKey, setRoutineRefreshKey] = useState(0)
   const [routineMuscleIds, setRoutineMuscleIds] = useState<string[]>([])
+
+  const dayRoutineCount = useMemo(
+    () => getDayRoutineCount(),
+    [routineRefreshKey, refreshKey],
+  )
 
   const detailMuscleId = mode.type === 'detail' ? mode.muscleId : null
   const activeHeadId = mode.type === 'detail' ? mode.headId : null
@@ -46,6 +53,10 @@ function App() {
 
   function bumpRefresh() {
     setRefreshKey((k) => k + 1)
+  }
+
+  function bumpRoutineRefresh() {
+    setRoutineRefreshKey((k) => k + 1)
   }
 
   function openMuscleDetail(muscleId: string, requiredView?: BodyView) {
@@ -118,7 +129,7 @@ function App() {
 
   return (
     <div className="app">
-      <header className="app__header">
+      <header className={`app__header${!showSidePanel ? ' app__header--narrow' : ''}`}>
         <div>
           <p className="app__eyebrow">Anatomía interactiva</p>
           <h1>Muscle Atlas</h1>
@@ -126,7 +137,11 @@ function App() {
           {(section === 'explore' || section === 'dashboard') && (
             <MuscleSearch onSelectResult={handleSearchSelect} />
           )}
-          <AppNav section={section} onSectionChange={handleSectionChange} />
+          <AppNav
+            section={section}
+            onSectionChange={handleSectionChange}
+            routineCount={dayRoutineCount}
+          />
         </div>
       </header>
 
@@ -141,7 +156,7 @@ function App() {
 
         {section === 'explore' && (
           <>
-            <section className="app__diagram-section">
+            <div className="app__explore-toolbar">
               <BodyHalfFilterBar value={bodyHalfFilter} onChange={setBodyHalfFilter} />
 
               <div className="view-controls">
@@ -162,7 +177,9 @@ function App() {
                   Vista posterior
                 </button>
               </div>
+            </div>
 
+            <section className="app__diagram-section">
               {mode.type === 'body' ? (
                 <BodyDiagram
                   view={view}
@@ -213,6 +230,8 @@ function App() {
                   : undefined
               }
               onStartRoutine={mode.type === 'body' ? handleStartRoutine : undefined}
+              onDayRoutineChange={bumpRoutineRefresh}
+              onGoToWorkout={() => setSection('routines')}
             />
           </>
         )}
@@ -222,8 +241,11 @@ function App() {
             bodyHalfFilter={bodyHalfFilter}
             onBodyHalfChange={setBodyHalfFilter}
             initialMuscleIds={routineMuscleIds}
+            routineRefreshKey={routineRefreshKey}
+            onRoutineChange={bumpRoutineRefresh}
             onWorkoutSaved={() => {
               bumpRefresh()
+              bumpRoutineRefresh()
               setRoutineMuscleIds([])
             }}
           />

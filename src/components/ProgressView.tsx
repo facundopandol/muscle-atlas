@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
 import type { MuscleMapValues } from '@musclemap/core'
-import { getBodyDiagram } from '@musclemap/assets'
+import { getVisibleMuscleGroups } from '@musclemap/core'
 import maleFront from '@musclemap/assets/bodies/male-front.webp'
 import maleBack from '@musclemap/assets/bodies/male-back.webp'
 import { BodyFigure } from '@musclemap/react'
-import { getVisibleMuscleGroups } from '@musclemap/core'
-import { muscleIdToMmGroup, MUSCLE_HIGHLIGHT_COLOR } from '../lib/muscleMapBridge'
+import { getAtlasBodyDiagram } from '../lib/chestDiagram'
+import { buildChestPartValues, muscleIdToMmGroup, MUSCLE_HIGHLIGHT_COLOR } from '../lib/muscleMapBridge'
 import { getMuscleScore, getPeriodComparison, loadCompletedWorkouts } from '../lib/workoutStorage'
 import { muscles } from '../data/muscles'
 import './ProgressView.css'
@@ -28,7 +28,7 @@ export function ProgressView({ refreshKey = 0 }: ProgressViewProps) {
     const values: MuscleMapValues = {}
     for (const stat of comparison.current.muscleStats) {
       const group = muscleIdToMmGroup(stat.muscleId)
-      if (!group) continue
+      if (!group || group === 'CHEST') continue
       const score = getMuscleScore(stat.muscleId, comparison.current.muscleStats)
       const prev = values[group]?.score ?? 0
       if (score > prev) values[group] = { score }
@@ -40,7 +40,7 @@ export function ProgressView({ refreshKey = 0 }: ProgressViewProps) {
     const values: MuscleMapValues = {}
     for (const stat of comparison.previous.muscleStats) {
       const group = muscleIdToMmGroup(stat.muscleId)
-      if (!group) continue
+      if (!group || group === 'CHEST') continue
       const score = getMuscleScore(stat.muscleId, comparison.previous.muscleStats)
       const prev = values[group]?.score ?? 0
       if (score > prev) values[group] = { score }
@@ -48,8 +48,24 @@ export function ProgressView({ refreshKey = 0 }: ProgressViewProps) {
     return values
   }, [comparison.previous.muscleStats])
 
-  const frontDiagram = getBodyDiagram('MALE', 'FRONT')
-  const backDiagram = getBodyDiagram('MALE', 'BACK')
+  const currentChestParts = useMemo(
+    () =>
+      buildChestPartValues((muscleId) =>
+        getMuscleScore(muscleId, comparison.current.muscleStats),
+      ),
+    [comparison.current.muscleStats],
+  )
+
+  const previousChestParts = useMemo(
+    () =>
+      buildChestPartValues((muscleId) =>
+        getMuscleScore(muscleId, comparison.previous.muscleStats),
+      ),
+    [comparison.previous.muscleStats],
+  )
+
+  const frontDiagram = getAtlasBodyDiagram('MALE', 'FRONT')
+  const backDiagram = getAtlasBodyDiagram('MALE', 'BACK')
   const visibleFront = new Set(getVisibleMuscleGroups('FRONT', 'FULL_BODY'))
   const visibleBack = new Set(getVisibleMuscleGroups('BACK', 'FULL_BODY'))
 
@@ -129,6 +145,7 @@ export function ProgressView({ refreshKey = 0 }: ProgressViewProps) {
             <BodyFigure
               diagram={frontDiagram}
               values={currentValues}
+              partValues={currentChestParts}
               colorModel="LOAD"
               monochromeColor={MUSCLE_HIGHLIGHT_COLOR}
               monochromeBaseColor="#9ca3af"
@@ -168,6 +185,7 @@ export function ProgressView({ refreshKey = 0 }: ProgressViewProps) {
             <BodyFigure
               diagram={frontDiagram}
               values={previousValues}
+              partValues={previousChestParts}
               colorModel="LOAD"
               monochromeColor={MUSCLE_HIGHLIGHT_COLOR}
               monochromeBaseColor="#9ca3af"

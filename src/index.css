@@ -10,6 +10,8 @@
   --accent-bg: rgba(184, 92, 40, 0.1);
   --accent-border: rgba(184, 92, 40, 0.35);
   --shadow: 0 8px 24px rgba(60, 45, 25, 0.08);
+  --content-narrow: 640px;
+  --content-wide: 920px;
 
   font-family: 'Segoe UI', system-ui, sans-serif;
   line-height: 1.5;

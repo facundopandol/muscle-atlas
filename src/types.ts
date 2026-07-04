@@ -192,6 +192,15 @@ export interface LoggedExercise {
   notes?: string
 }
 
+/** Ejercicio seleccionado manualmente para la rutina del día. */
+export interface DayRoutineItem {
+  muscleId: string
+  exerciseName: string
+  equipment: Equipment
+  sets: string
+  reps: string
+}
+
 export interface WorkoutSession {
   id: string
   date: string

@@ -2,6 +2,7 @@ import { muscleMap } from '../data/muscles'
 import { exerciseKey } from './exerciseKey'
 import type {
   CompletedWorkout,
+  DayRoutineItem,
   LoggedExercise,
   LoggedSet,
   MuscleTrainingStats,
@@ -18,6 +19,11 @@ interface TrainingStore {
   sessions: WorkoutSession[]
   favorites: string[]
   prs: PersonalRecord[]
+  dayRoutine?: {
+    date: string
+    label?: string
+    items: DayRoutineItem[]
+  }
 }
 
 function readStore(): TrainingStore {
@@ -29,6 +35,7 @@ function readStore(): TrainingStore {
         sessions: Array.isArray(parsed.sessions) ? parsed.sessions : [],
         favorites: Array.isArray(parsed.favorites) ? parsed.favorites : [],
         prs: Array.isArray(parsed.prs) ? parsed.prs : [],
+        dayRoutine: normalizeDayRoutine(parsed.dayRoutine),
       }
     }
     migrateFromV1()
@@ -168,6 +175,66 @@ export function toggleFavorite(key: string): boolean {
 
 export function isFavorite(key: string): boolean {
   return readStore().favorites.includes(key)
+}
+
+function todayDate(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function normalizeDayRoutine(
+  raw: TrainingStore['dayRoutine'],
+): TrainingStore['dayRoutine'] {
+  if (!raw || raw.date !== todayDate() || !Array.isArray(raw.items)) return undefined
+  return {
+    date: raw.date,
+    label: raw.label,
+    items: raw.items.filter((item) => item.muscleId && item.exerciseName && item.equipment),
+  }
+}
+
+export function loadDayRoutine(): DayRoutineItem[] {
+  const routine = readStore().dayRoutine
+  if (!routine || routine.date !== todayDate()) return []
+  return routine.items
+}
+
+export function getDayRoutineCount(): number {
+  return loadDayRoutine().length
+}
+
+export function addToDayRoutine(item: DayRoutineItem): boolean {
+  const store = readStore()
+  const date = todayDate()
+  const current =
+    store.dayRoutine?.date === date ? store.dayRoutine.items : []
+  const key = exerciseKey(item.muscleId, item.exerciseName, item.equipment)
+  if (current.some((i) => exerciseKey(i.muscleId, i.exerciseName, i.equipment) === key)) {
+    return false
+  }
+  store.dayRoutine = { date, label: store.dayRoutine?.label, items: [...current, item] }
+  writeStore(store)
+  return true
+}
+
+export function removeFromDayRoutine(key: string) {
+  const store = readStore()
+  if (!store.dayRoutine || store.dayRoutine.date !== todayDate()) return
+  store.dayRoutine = {
+    ...store.dayRoutine,
+    items: store.dayRoutine.items.filter(
+      (i) => exerciseKey(i.muscleId, i.exerciseName, i.equipment) !== key,
+    ),
+  }
+  if (store.dayRoutine.items.length === 0) {
+    delete store.dayRoutine
+  }
+  writeStore(store)
+}
+
+export function clearDayRoutine() {
+  const store = readStore()
+  delete store.dayRoutine
+  writeStore(store)
 }
 
 /** Compat con ProgressView y código legacy. */

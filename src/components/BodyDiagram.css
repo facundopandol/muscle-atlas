@@ -19,6 +19,13 @@
   padding: 1rem 0.5rem;
 }
 
+@media (prefers-color-scheme: dark) {
+  .body-diagram--musclemap .body-diagram__stage {
+    background: radial-gradient(ellipse at 50% 30%, #3a342c 0%, #2a2520 70%);
+    border-color: rgba(160, 140, 110, 0.25);
+  }
+}
+
 .body-diagram__credit {
   margin: 0.35rem 0 0;
   font-size: 0.68rem;

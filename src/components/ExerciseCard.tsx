@@ -11,8 +11,10 @@ interface ExerciseCardProps {
   focus?: ExerciseFocus | null
   highlighted?: boolean
   isFavorite?: boolean
+  isInRoutine?: (equipment: Equipment) => boolean
   onToggleFavorite?: (equipment: Equipment) => void
   onViewHistory?: (equipment: Equipment) => void
+  onAddToRoutine?: (equipment: Equipment) => void
 }
 
 export function ExerciseCard({
@@ -20,8 +22,10 @@ export function ExerciseCard({
   focus,
   highlighted,
   isFavorite,
+  isInRoutine,
   onToggleFavorite,
   onViewHistory,
+  onAddToRoutine,
 }: ExerciseCardProps) {
   const [variantIndex, setVariantIndex] = useState(0)
   const [gifFailed, setGifFailed] = useState(false)
@@ -29,6 +33,7 @@ export function ExerciseCard({
 
   const variant = exercise.variants[variantIndex]
   const hasMultipleVariants = exercise.variants.length > 1
+  const inRoutine = isInRoutine?.(variant.equipment) ?? false
 
   useEffect(() => {
     if (!focus) return
@@ -126,6 +131,17 @@ export function ExerciseCard({
           <span className="exercise-card__equipment-tag">
             {EQUIPMENT_LABELS[variant.equipment]}
           </span>
+        )}
+
+        {onAddToRoutine && (
+          <button
+            type="button"
+            className={`exercise-card__add-routine${inRoutine ? ' exercise-card__add-routine--added' : ''}`}
+            onClick={() => onAddToRoutine(variant.equipment)}
+            disabled={inRoutine}
+          >
+            {inRoutine ? 'En tu rutina del día' : 'Agregar a rutina del día'}
+          </button>
         )}
 
         <p className="exercise-card__form">{variant.formGuide}</p>

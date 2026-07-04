@@ -4,6 +4,7 @@
   border-radius: 16px;
   padding: 1.5rem;
   min-height: 520px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -112,6 +113,19 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
+  width: 100%;
+}
+
+.muscle-panel .exercise-card {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.muscle-panel .exercise-card__media {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .muscle-panel__attribution {
@@ -172,6 +186,7 @@
 .muscle-panel__actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 0.5rem;
   margin: 0.65rem 0;
 }
@@ -205,4 +220,37 @@
   margin: 0;
   font-size: 0.88rem;
   color: var(--text-muted);
+}
+
+.muscle-panel__routine-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: var(--text-h);
+}
+
+.muscle-panel__routine-go {
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.muscle-panel__toast {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--accent);
+  text-align: center;
 }
