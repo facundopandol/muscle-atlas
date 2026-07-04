@@ -1,0 +1,172 @@
+.muscle-search {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin-top: 1.25rem;
+}
+
+.muscle-search__label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.4rem;
+}
+
+.muscle-search__input-wrap {
+  position: relative;
+}
+
+.muscle-search__input {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.95rem;
+  padding: 0.65rem 2.25rem 0.65rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-h);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.muscle-search__input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
+.muscle-search__input:focus {
+  outline: none;
+  border-color: var(--accent-border);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.muscle-search__clear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0.2rem 0.4rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.muscle-search__clear:hover {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.muscle-search__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+}
+
+.muscle-search__filter-chip {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.22rem 0.55rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.muscle-search__filter-chip:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.muscle-search__results {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 0.35rem;
+  list-style: none;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.muscle-search__result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  font: inherit;
+  padding: 0.6rem 0.65rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.muscle-search__result:hover,
+.muscle-search__result:focus-visible {
+  background: var(--accent-bg);
+  outline: none;
+}
+
+.muscle-search__result-muscle {
+  font-weight: 600;
+  color: var(--text-h);
+  font-size: 0.92rem;
+}
+
+.muscle-search__result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.muscle-search__result-equipment {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.muscle-search__result-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.muscle-search__result-hint strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.muscle-search__empty,
+.muscle-search__more {
+  padding: 0.75rem 0.65rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.muscle-search__more {
+  font-size: 0.75rem;
+  font-style: italic;
+  border-top: 1px solid var(--border);
+  margin-top: 0.25rem;
+}

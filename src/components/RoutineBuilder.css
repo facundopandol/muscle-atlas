@@ -1,0 +1,156 @@
+.routine-builder {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.routine-builder__header h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  color: var(--text-h);
+}
+
+.routine-builder__header p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.routine-builder__picker-label {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.routine-builder__muscles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.routine-builder__muscle {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.routine-builder__muscle:hover:not(:disabled) {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.routine-builder__muscle--selected {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.routine-builder__muscle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.routine-builder__label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.routine-builder__input {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-h);
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+}
+
+.routine-builder__build,
+.routine-builder__save {
+  align-self: flex-start;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.routine-builder__build:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.routine-builder__plan {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.routine-builder__plan h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.1rem;
+  color: var(--text-h);
+}
+
+.routine-builder__exercises {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.routine-builder__exercises li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.routine-builder__exercises li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.routine-builder__ex-muscle {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+}
+
+.routine-builder__ex-meta {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.routine-builder__toast {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+}

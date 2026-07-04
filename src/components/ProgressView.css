@@ -1,0 +1,221 @@
+.progress-view {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.progress-view__header h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  color: var(--text-h);
+}
+
+.progress-view__header p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.progress-view__period {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.progress-view__period-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.progress-view__period-btn--active {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.progress-view__refresh {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 0.25rem;
+}
+
+.progress-view__summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+}
+
+.progress-view__card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.progress-view__card--muted {
+  opacity: 0.85;
+}
+
+.progress-view__card-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.progress-view__card-value {
+  font-size: 1.5rem;
+  color: var(--text-h);
+  line-height: 1.1;
+}
+
+.progress-view__card-value--up {
+  color: var(--accent);
+}
+
+.progress-view__card-value--down {
+  color: #b85450;
+}
+
+.progress-view__card-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.progress-view__maps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.progress-view__map-block h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.progress-view__map-row {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.5rem;
+}
+
+.progress-view__map-row svg {
+  pointer-events: none;
+}
+
+.progress-view__table-wrap h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-h);
+}
+
+.progress-view__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.progress-view__table th,
+.progress-view__table td {
+  text-align: left;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.progress-view__table th {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.progress-view__up {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.progress-view__down {
+  color: #b85450;
+}
+
+.progress-view__empty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  line-height: 1.5;
+}
+
+.progress-view__history h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-h);
+}
+
+.progress-view__history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.progress-view__history li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.65rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.progress-view__history time {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+.progress-view__history-meta {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 640px) {
+  .progress-view__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-view__maps {
+    grid-template-columns: 1fr;
+  }
+}

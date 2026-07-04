@@ -1,0 +1,209 @@
+.muscle-detail {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.muscle-detail__toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.muscle-detail__back {
+  align-self: flex-start;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.muscle-detail__back:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.muscle-detail__titles h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: var(--text-h);
+}
+
+.muscle-detail__titles p {
+  margin: 0.2rem 0 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.muscle-detail__stage {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.muscle-detail__visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.muscle-detail__visual > svg:first-of-type {
+  pointer-events: none !important;
+}
+
+.muscle-detail__visual > svg:first-of-type path {
+  pointer-events: none !important;
+}
+
+.muscle-detail__overlay {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+.head-hit-layer {
+  pointer-events: all;
+}
+
+.head-hit {
+  fill: rgba(224, 112, 48, 0.12);
+  stroke: rgba(224, 112, 48, 0.45);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  cursor: pointer;
+  pointer-events: all;
+  transition: fill 0.15s ease, stroke 0.15s ease;
+}
+
+.head-hit:hover {
+  fill: rgba(224, 112, 48, 0.42);
+  stroke: rgba(120, 50, 15, 0.9);
+  stroke-width: 1.8;
+}
+
+.head-hit--active {
+  fill: rgba(224, 112, 48, 0.68);
+  stroke: #7a2e0a;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 5px rgba(184, 92, 40, 0.4));
+}
+
+.head-hit:focus-visible {
+  outline: 2px solid var(--accent, #c47848);
+  outline-offset: 1px;
+}
+
+.muscle-detail__head-card {
+  padding: 0.75rem 0.25rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.muscle-detail__head-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.4rem;
+}
+
+.muscle-detail__head-card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: var(--text-h);
+}
+
+.muscle-detail__head-card > p {
+  margin: 0 0 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.muscle-detail__train {
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+}
+
+.muscle-detail__train strong {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+
+.muscle-detail__train p {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-h);
+}
+
+.muscle-detail__head-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.muscle-detail__chip {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.muscle-detail__chip--active,
+.muscle-detail__chip:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.muscle-detail__fallback-msg {
+  color: var(--text-muted);
+  margin: 1rem 0 0;
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .muscle-detail__stage {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .muscle-detail__head-card {
+    border-top: none;
+    padding-top: 0;
+  }
+}

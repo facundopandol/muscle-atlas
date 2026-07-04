@@ -1,0 +1,72 @@
+.exercise-illus {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.exercise-illus__svg {
+  display: block;
+  width: 100px;
+  height: 80px;
+}
+
+.exercise-illus__bg {
+  fill: var(--surface-elevated);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.exercise-illus__caption {
+  margin-top: 0.25rem;
+  font-size: 0.65rem;
+  text-align: center;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.exercise-illus__head {
+  fill: var(--accent-bg);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+
+.exercise-illus__limb {
+  stroke: var(--text-h);
+  opacity: 0.75;
+}
+
+.exercise-illus__equipment,
+.exercise-illus__bar {
+  stroke: var(--text-muted);
+  fill: var(--border);
+}
+
+.exercise-illus__bar {
+  fill: var(--text-muted);
+  stroke: none;
+}
+
+.exercise-illus__weight {
+  fill: var(--accent);
+  opacity: 0.7;
+}
+
+.exercise-illus__wheel {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 2;
+}
+
+.exercise-illus__cable {
+  stroke: var(--text-muted);
+}
+
+.exercise-illus__ground {
+  stroke: var(--border);
+}
+
+.exercise-illus__arrow,
+.exercise-illus__arrow-head {
+  stroke: var(--accent);
+  fill: var(--accent);
+}
