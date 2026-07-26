@@ -15,6 +15,7 @@ import {
   highlightChestParts,
   MUSCLE_HIGHLIGHT_COLOR,
 } from '../lib/muscleMapBridge'
+import { ArmHeadsDiagram } from './ArmHeadsDiagram'
 import './MuscleDetailView.css'
 
 interface MuscleDetailViewProps {
@@ -105,20 +106,14 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
   const cropViewBox = getDetailCropViewBox(muscleId)
   const activeHead = config?.heads.find((h) => h.id === activeHeadId) ?? config?.heads[0] ?? null
   const clickableHeads = hasClickableHeads(muscleId)
+  const useArmSchematic =
+    config?.detailVisual === 'arm-front' || config?.detailVisual === 'arm-back'
 
   const cropParts = useMemo(() => {
     if (!cropViewBox) return null
     const [vbX, vbY, vbW, vbH] = cropViewBox.split(/\s+/).map(Number)
     return { vbX, vbY, vbW, vbH }
   }, [cropViewBox])
-
-  const overlaySize = useMemo(() => {
-    if (!cropParts) return { width: FIGURE_WIDTH, height: FIGURE_WIDTH }
-    return {
-      width: FIGURE_WIDTH,
-      height: FIGURE_WIDTH * (cropParts.vbH / cropParts.vbW),
-    }
-  }, [cropParts])
 
   const diagram = useMemo(() => {
     if (!mmConfig) return null
@@ -165,8 +160,22 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
       </div>
 
       <div className="muscle-detail__stage">
-        {mmConfig && diagram && cropViewBox ? (
-          <div className="muscle-detail__visual" style={{ height: overlaySize.height }}>
+        {useArmSchematic && config ? (
+          <ArmHeadsDiagram
+            heads={config.heads}
+            activeHeadId={activeHead?.id ?? null}
+            onHeadSelect={onHeadSelect}
+            side={config.detailVisual === 'arm-back' ? 'back' : 'front'}
+          />
+        ) : mmConfig && diagram && cropViewBox ? (
+          <div
+            className="muscle-detail__visual"
+            style={
+              cropParts
+                ? { aspectRatio: `${cropParts.vbW} / ${cropParts.vbH}` }
+                : undefined
+            }
+          >
             <BodyFigure
               diagram={diagram}
               cropViewBox={cropViewBox}
@@ -192,8 +201,6 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
               <svg
                 className="muscle-detail__overlay"
                 viewBox={cropViewBox}
-                width={overlaySize.width}
-                height={overlaySize.height}
                 preserveAspectRatio="xMidYMid meet"
                 aria-label="Cabezas musculares seleccionables"
               >
@@ -202,7 +209,7 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
                     heads={config.heads}
                     activeHeadId={activeHead?.id ?? null}
                     mirrorCenterX={mirrorCenterX}
-                    bilateral
+                    bilateral={config.bilateral !== false}
                     onHeadSelect={onHeadSelect}
                   />
                 </g>

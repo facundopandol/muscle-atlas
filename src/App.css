@@ -7,6 +7,41 @@
   align-items: center;
 }
 
+@media (max-width: 720px) {
+  .app {
+    padding: 1.15rem 0.85rem calc(5.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app__header {
+    margin-bottom: 1.15rem;
+  }
+
+  .app__header h1 {
+    font-size: clamp(1.7rem, 8vw, 2.2rem);
+  }
+
+  .app__subtitle {
+    font-size: 0.92rem;
+  }
+
+  .app__explore-toolbar {
+    gap: 0.55rem;
+  }
+
+  .app__diagram-section {
+    max-width: 100%;
+  }
+
+  .muscle-chips {
+    max-width: 100%;
+  }
+
+  .muscle-panel {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
 .app__header {
   width: 100%;
   max-width: var(--content-wide);
@@ -70,6 +105,8 @@
   align-items: center;
   gap: 1rem;
   width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .view-controls {
@@ -118,6 +155,7 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: center;
   gap: 0.45rem;
   max-width: 480px;
 }
@@ -125,9 +163,10 @@
 .muscle-chip {
   border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--text-muted);
+  color: var(--text-h);
   font: inherit;
   font-size: 0.78rem;
+  font-weight: 600;
   padding: 0.3rem 0.65rem;
   border-radius: 999px;
   cursor: pointer;
@@ -139,6 +178,12 @@
   border-color: var(--accent-border);
   color: var(--accent);
   background: var(--accent-bg);
+}
+
+@media (max-width: 720px) {
+  .muscle-chips {
+    gap: 0.35rem;
+  }
 }
 
 .app__main--single {

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { MUSCLE_PICKER_GROUPS } from '../data/muscleGroups'
 import { muscles } from '../data/muscles'
 import { buildWorkoutPlan } from '../lib/routines'
 import { saveSession, loadDayRoutine, clearDayRoutine, removeFromDayRoutine, loadFavorites } from '../lib/trainingStorage'
@@ -125,6 +126,16 @@ export function WorkoutLogger({
     [bodyHalfFilter],
   )
 
+  const pickerGroups = useMemo(() => {
+    const byId = new Map(availableMuscles.map((m) => [m.id, m]))
+    return MUSCLE_PICKER_GROUPS.map((group) => ({
+      ...group,
+      muscles: group.muscleIds
+        .map((id) => byId.get(id))
+        .filter((m): m is (typeof availableMuscles)[number] => Boolean(m)),
+    })).filter((g) => g.muscles.length > 0)
+  }, [availableMuscles])
+
   function toggleMuscle(muscleId: string) {
     setSavedMsg(null)
     setNewPrs([])
@@ -250,23 +261,30 @@ export function WorkoutLogger({
             <p className="workout-logger__picker-label">
               Grupos: {selectedIds.length}/{MAX_MUSCLES}
             </p>
-            <div className="workout-logger__muscles" role="group">
-              {availableMuscles.map((muscle) => {
-                const selected = selectedIds.includes(muscle.id)
-                const disabled = !selected && selectedIds.length >= MAX_MUSCLES
-                return (
-                  <button
-                    key={muscle.id}
-                    type="button"
-                    className={`workout-logger__muscle${selected ? ' workout-logger__muscle--selected' : ''}`}
-                    aria-pressed={selected}
-                    disabled={disabled}
-                    onClick={() => toggleMuscle(muscle.id)}
-                  >
-                    {muscle.name}
-                  </button>
-                )
-              })}
+            <div className="workout-logger__groups">
+              {pickerGroups.map((group) => (
+                <div key={group.id} className="workout-logger__group">
+                  <p className="workout-logger__group-label">{group.label}</p>
+                  <div className="workout-logger__muscles" role="group" aria-label={group.label}>
+                    {group.muscles.map((muscle) => {
+                      const selected = selectedIds.includes(muscle.id)
+                      const disabled = !selected && selectedIds.length >= MAX_MUSCLES
+                      return (
+                        <button
+                          key={muscle.id}
+                          type="button"
+                          className={`workout-logger__muscle${selected ? ' workout-logger__muscle--selected' : ''}`}
+                          aria-pressed={selected}
+                          disabled={disabled}
+                          onClick={() => toggleMuscle(muscle.id)}
+                        >
+                          {muscle.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

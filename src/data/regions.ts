@@ -52,7 +52,10 @@ export const frontRegions: BodyRegion[] = [
     view: 'front',
     paths: ['M 148 118 C 128 122 108 132 100 148 L 148 152 L 252 152 L 300 148 C 292 132 272 122 252 118 Z'],
     menuAnchor: { x: 200, y: 138 },
-    muscles: [{ muscleId: 'front-deltoid', label: 'Deltoides anterior', view: 'front' }],
+    muscles: [
+      { muscleId: 'front-deltoid', label: 'Deltoides anterior', view: 'front' },
+      { muscleId: 'side-deltoid', label: 'Deltoides lateral', view: 'front' },
+    ],
   },
   {
     id: 'chest',
@@ -61,8 +64,9 @@ export const frontRegions: BodyRegion[] = [
     paths: ['M 158 128 C 152 145 152 195 168 210 L 232 210 C 248 195 248 145 242 128 C 220 118 180 118 158 128 Z'],
     menuAnchor: { x: 200, y: 172 },
     muscles: [
-      { muscleId: 'upper-chest', label: 'Pectoral superior', view: 'front' },
-      { muscleId: 'lower-chest', label: 'Pectoral inferior', view: 'front' },
+      { muscleId: 'upper-chest', label: 'Pectoral clavicular', view: 'front' },
+      { muscleId: 'mid-chest', label: 'Pectoral esternal', view: 'front' },
+      { muscleId: 'lower-chest', label: 'Pectoral costal', view: 'front' },
     ],
   },
   {

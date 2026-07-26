@@ -1,0 +1,91 @@
+.arm-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.arm-diagram--atlas {
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.arm-diagram__visual {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.arm-diagram__visual > svg {
+  display: block;
+  width: 100% !important;
+  max-width: 100%;
+  height: auto !important;
+}
+
+.arm-diagram__visual > svg:first-of-type {
+  pointer-events: none !important;
+}
+
+.arm-diagram__visual > svg:first-of-type path {
+  pointer-events: none !important;
+}
+
+.arm-diagram__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+.arm-diagram__muscle-outline {
+  fill: none;
+  stroke: rgba(224, 112, 48, 0.35);
+  stroke-width: 1.2;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.arm-diagram__split {
+  fill: none;
+  stroke: rgba(120, 50, 15, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+.arm-diagram__head {
+  fill: rgba(224, 112, 48, 0.2);
+  stroke: none;
+  cursor: pointer;
+  pointer-events: all;
+  transition: fill 0.15s ease, filter 0.15s ease;
+}
+
+.arm-diagram__head:hover {
+  fill: rgba(224, 112, 48, 0.48);
+}
+
+.arm-diagram__head--active {
+  fill: rgba(224, 112, 48, 0.72);
+  filter: drop-shadow(0 0 5px rgba(184, 92, 40, 0.4));
+}
+
+.arm-diagram__head:focus-visible {
+  outline: 2px solid var(--accent, #c47848);
+  outline-offset: 2px;
+}
+
+.arm-diagram__caption {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}

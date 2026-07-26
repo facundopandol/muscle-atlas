@@ -6,11 +6,10 @@ import './Dashboard.css'
 
 interface DashboardProps {
   onStartWorkout: () => void
-  onExplore: () => void
   refreshKey: number
 }
 
-export function Dashboard({ onStartWorkout, onExplore, refreshKey }: DashboardProps) {
+export function Dashboard({ onStartWorkout, refreshKey }: DashboardProps) {
   const stats = useMemo(() => getDashboardStats(), [refreshKey])
 
   return (
@@ -42,9 +41,6 @@ export function Dashboard({ onStartWorkout, onExplore, refreshKey }: DashboardPr
       <div className="dashboard__actions">
         <button type="button" className="dashboard__btn dashboard__btn--primary" onClick={onStartWorkout}>
           Registrar entrenamiento
-        </button>
-        <button type="button" className="dashboard__btn dashboard__btn--secondary" onClick={onExplore}>
-          Explorar cuerpo
         </button>
       </div>
 

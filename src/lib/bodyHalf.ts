@@ -4,8 +4,10 @@ import type { BodyHalfFilter } from '../types'
 /** Clasificación tren superior / inferior para filtros y rutinas. */
 const MUSCLE_BODY_HALF: Record<string, 'upper' | 'lower'> = {
   'upper-chest': 'upper',
+  'mid-chest': 'upper',
   'lower-chest': 'upper',
   'front-deltoid': 'upper',
+  'side-deltoid': 'upper',
   'rear-deltoid': 'upper',
   biceps: 'upper',
   triceps: 'upper',

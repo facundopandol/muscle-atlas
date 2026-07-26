@@ -85,7 +85,7 @@ export function BodyDiagram({
     }
 
     const highlightMuscleId = hoveredMuscleId ?? selectedMuscleId
-    if (highlightMuscleId === 'upper-chest' || highlightMuscleId === 'lower-chest') {
+    if (highlightMuscleId === 'upper-chest' || highlightMuscleId === 'mid-chest' || highlightMuscleId === 'lower-chest') {
       return highlightChestParts(chestPartValues, highlightMuscleId)
     }
 

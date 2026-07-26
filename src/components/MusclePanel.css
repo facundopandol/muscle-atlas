@@ -73,6 +73,42 @@
   padding: 0.2rem 0.6rem;
 }
 
+.muscle-panel__heads {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.65rem 0 0.25rem;
+}
+
+.muscle-panel__header .muscle-panel__head-hint {
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
+}
+
+.muscle-panel__head-chip {
+  border: 1px solid var(--border);
+  background: var(--surface-elevated);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.muscle-panel__head-chip:hover {
+  border-color: var(--accent-border);
+  color: var(--accent);
+}
+
+.muscle-panel__head-chip--active {
+  border-color: var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
 .muscle-panel__head-train {
   margin-top: 0.85rem;
   padding: 0.65rem 0.85rem;

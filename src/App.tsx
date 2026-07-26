@@ -10,7 +10,7 @@ import { WorkoutLogger } from './components/WorkoutLogger'
 import { ProgressView } from './components/ProgressView'
 import type { SearchResult } from './lib/searchIndex'
 import { muscleMatchesBodyHalf } from './lib/bodyHalf'
-import { getDefaultHeadId, getMuscleDetail } from './data/muscleHeads'
+import { getDefaultHeadId, getMuscleDetail, hasClickableHeads } from './data/muscleHeads'
 import { muscleMap } from './data/muscles'
 import { getDayRoutineCount } from './lib/trainingStorage'
 import type { AppMode, AppSection, BodyHalfFilter, BodyView, ExerciseFocus } from './types'
@@ -94,7 +94,21 @@ function App() {
     setMode({ ...mode, headId })
   }
 
+  function openMuscleHead(muscleId: string, headId: string, requiredView?: BodyView) {
+    const muscle = muscleMap.get(muscleId)
+    setSection('explore')
+    setView(requiredView ?? muscle?.view ?? 'front')
+    setExerciseFocus(null)
+    setHoveredMuscleId(null)
+    setSelectedMuscleId(muscleId)
+    setMode({ type: 'detail', muscleId, headId })
+  }
+
   function handleMuscleSelectFromMap(muscleId: string, requiredView: BodyView) {
+    if (hasClickableHeads(muscleId)) {
+      openMuscleDetail(muscleId, requiredView)
+      return
+    }
     const muscle = muscleMap.get(muscleId)
     setView(requiredView ?? muscle?.view ?? 'front')
     setSelectedMuscleId(muscleId)
@@ -138,6 +152,7 @@ function App() {
             <MuscleSearch onSelectResult={handleSearchSelect} />
           )}
           <AppNav
+            variant="top"
             section={section}
             onSectionChange={handleSectionChange}
             routineCount={dayRoutineCount}
@@ -150,7 +165,6 @@ function App() {
           <Dashboard
             refreshKey={refreshKey}
             onStartWorkout={() => setSection('routines')}
-            onExplore={() => setSection('explore')}
           />
         )}
 
@@ -200,19 +214,23 @@ function App() {
               )}
 
               {mode.type === 'body' && (
-                <div className="muscle-chips" aria-label="Acceso rápido">
-                  {viewMuscles.map((muscle) => (
-                    <button
-                      key={muscle.id}
-                      type="button"
-                      className={`muscle-chip${(hoveredMuscleId ?? selectedMuscleId) === muscle.id ? ' muscle-chip--active' : ''}`}
-                      onMouseEnter={() => setHoveredMuscleId(muscle.id)}
-                      onMouseLeave={() => setHoveredMuscleId(null)}
-                      onClick={() => handleMuscleSelectFromMap(muscle.id, muscle.view)}
-                    >
-                      {muscle.name}
-                    </button>
-                  ))}
+                <div className="muscle-chips" aria-label="Músculos elegibles">
+                  {viewMuscles.map((muscle) => {
+                    const detail = getMuscleDetail(muscle.id)
+                    const active = (hoveredMuscleId ?? selectedMuscleId) === muscle.id
+                    return (
+                      <button
+                        key={muscle.id}
+                        type="button"
+                        className={`muscle-chip${active ? ' muscle-chip--active' : ''}`}
+                        onMouseEnter={() => setHoveredMuscleId(muscle.id)}
+                        onMouseLeave={() => setHoveredMuscleId(null)}
+                        onClick={() => handleMuscleSelectFromMap(muscle.id, muscle.view)}
+                      >
+                        {detail?.title ?? muscle.name}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </section>
@@ -220,6 +238,11 @@ function App() {
             <MusclePanel
               muscle={displayMuscle}
               activeHead={mode.type === 'detail' ? activeHead : null}
+              headOptions={
+                displayMuscle && hasClickableHeads(displayMuscle.id)
+                  ? getMuscleDetail(displayMuscle.id)?.heads ?? []
+                  : []
+              }
               pinned={mode.type === 'detail'}
               preview={mode.type === 'body' && hoveredMuscleId !== null && !selectedMuscleId}
               exerciseFocus={exerciseFocus}
@@ -227,6 +250,11 @@ function App() {
               onOpenDetail={
                 selectedMuscleId && mode.type === 'body'
                   ? () => openMuscleDetail(selectedMuscleId)
+                  : undefined
+              }
+              onHeadSelect={
+                displayMuscle && hasClickableHeads(displayMuscle.id)
+                  ? (headId) => openMuscleHead(displayMuscle.id, headId, displayMuscle.view)
                   : undefined
               }
               onStartRoutine={mode.type === 'body' ? handleStartRoutine : undefined}
@@ -253,6 +281,13 @@ function App() {
 
         {section === 'progress' && <ProgressView key={refreshKey} refreshKey={refreshKey} />}
       </main>
+
+      <AppNav
+        variant="bottom"
+        section={section}
+        onSectionChange={handleSectionChange}
+        routineCount={dayRoutineCount}
+      />
     </div>
   )
 }

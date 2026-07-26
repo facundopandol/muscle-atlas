@@ -50,16 +50,18 @@ export function ProgressView({ refreshKey = 0 }: ProgressViewProps) {
 
   const currentChestParts = useMemo(
     () =>
-      buildChestPartValues((muscleId) =>
-        getMuscleScore(muscleId, comparison.current.muscleStats),
+      buildChestPartValues(
+        (muscleId) => getMuscleScore(muscleId, comparison.current.muscleStats),
+        { omitZero: true },
       ),
     [comparison.current.muscleStats],
   )
 
   const previousChestParts = useMemo(
     () =>
-      buildChestPartValues((muscleId) =>
-        getMuscleScore(muscleId, comparison.previous.muscleStats),
+      buildChestPartValues(
+        (muscleId) => getMuscleScore(muscleId, comparison.previous.muscleStats),
+        { omitZero: true },
       ),
     [comparison.previous.muscleStats],
   )

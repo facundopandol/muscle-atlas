@@ -33,13 +33,15 @@ export const MM_LABELS_ES: Partial<Record<MuscleGroup, string>> = {
 export const CHEST_PART_TO_MUSCLE: Record<ChestPartId, string> = {
   CHEST_UPPER_LEFT: 'upper-chest',
   CHEST_UPPER_RIGHT: 'upper-chest',
+  CHEST_MID_LEFT: 'mid-chest',
+  CHEST_MID_RIGHT: 'mid-chest',
   CHEST_LOWER_LEFT: 'lower-chest',
   CHEST_LOWER_RIGHT: 'lower-chest',
 }
 
 const GROUP_TO_MUSCLE: Partial<Record<MuscleGroup, string>> = {
   SHOULDERS_FRONT: 'front-deltoid',
-  SHOULDERS_SIDE: 'front-deltoid',
+  SHOULDERS_SIDE: 'side-deltoid',
   SHOULDERS_REAR: 'rear-deltoid',
   BICEPS: 'biceps',
   TRICEPS: 'triceps',
@@ -63,6 +65,7 @@ export function chestPartToMuscleId(partId?: string): string | null {
 
 export function muscleIdToChestParts(muscleId: string): ChestPartId[] {
   if (muscleId === 'upper-chest') return ['CHEST_UPPER_LEFT', 'CHEST_UPPER_RIGHT']
+  if (muscleId === 'mid-chest') return ['CHEST_MID_LEFT', 'CHEST_MID_RIGHT']
   if (muscleId === 'lower-chest') return ['CHEST_LOWER_LEFT', 'CHEST_LOWER_RIGHT']
   return []
 }
@@ -79,8 +82,10 @@ export function mmGroupToMuscleId(group: MuscleGroup, partId?: string): string |
 export function muscleIdToMmGroup(muscleId: string): MuscleGroup | null {
   const map: Record<string, MuscleGroup> = {
     'upper-chest': 'CHEST',
+    'mid-chest': 'CHEST',
     'lower-chest': 'CHEST',
     'front-deltoid': 'SHOULDERS_FRONT',
+    'side-deltoid': 'SHOULDERS_SIDE',
     'rear-deltoid': 'SHOULDERS_REAR',
     biceps: 'BICEPS',
     triceps: 'TRICEPS',
@@ -123,8 +128,10 @@ export function getMuscleDetailMmConfig(muscleId: string): MuscleDetailMmConfig 
     triceps: 'UPPER_BODY',
     forearms: 'UPPER_BODY',
     'front-deltoid': 'UPPER_BODY',
+    'side-deltoid': 'UPPER_BODY',
     'rear-deltoid': 'UPPER_BODY',
     'upper-chest': 'UPPER_BODY',
+    'mid-chest': 'UPPER_BODY',
     'lower-chest': 'UPPER_BODY',
     trapezius: 'UPPER_BODY',
     lats: 'UPPER_BODY',
@@ -161,14 +168,22 @@ export function getDetailCropViewBox(muscleId: string): string | undefined {
   return diagram.regionBox?.[mm.region]
 }
 
-/** Per-surface recovery/load values for split chest regions. */
+/**
+ * Per-surface recovery/load values for split chest regions.
+ * @param omitZero Si true, no incluye score 0. En LOAD/monochrome un `{score:0}`
+ *   igual pinta el pecho (BodyFigure trata el objeto como “con valor”); en
+ *   recuperación conviene incluir 0 para igualar al resto de músculos.
+ */
 export function buildChestPartValues(
   scoreForMuscle: (muscleId: string) => number,
+  options?: { omitZero?: boolean },
 ): PartValues {
   const values: PartValues = {}
   for (const partId of CHEST_PART_IDS) {
     const muscleId = CHEST_PART_TO_MUSCLE[partId]
-    values[partId] = { score: scoreForMuscle(muscleId) }
+    const score = scoreForMuscle(muscleId)
+    if (options?.omitZero && score <= 0) continue
+    values[partId] = { score }
   }
   return values
 }

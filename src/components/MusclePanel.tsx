@@ -10,11 +10,13 @@ import './MusclePanel.css'
 interface MusclePanelProps {
   muscle: Muscle | null
   activeHead?: MuscleHead | null
+  headOptions?: MuscleHead[]
   pinned: boolean
   preview?: boolean
   exerciseFocus?: ExerciseFocus | null
   refreshKey?: number
   onOpenDetail?: () => void
+  onHeadSelect?: (headId: string) => void
   onStartRoutine?: (muscleId: string) => void
   onDayRoutineChange?: () => void
   onGoToWorkout?: () => void
@@ -23,11 +25,13 @@ interface MusclePanelProps {
 export function MusclePanel({
   muscle,
   activeHead,
+  headOptions = [],
   pinned,
   preview,
   exerciseFocus,
   refreshKey = 0,
   onOpenDetail,
+  onHeadSelect,
   onStartRoutine,
   onDayRoutineChange,
   onGoToWorkout,
@@ -142,7 +146,37 @@ export function MusclePanel({
         <span className="muscle-panel__badge">
           {pinned ? 'Músculo activo' : preview ? 'Vista previa' : 'Selección'}
         </span>
-        <h2>{activeHead ? activeHead.name : muscle.name}</h2>
+        <h2>
+          {activeHead
+            ? activeHead.name
+            : headOptions.length > 0
+              ? `${muscle.name}: elegí una zona`
+              : muscle.name}
+        </h2>
+
+        {headOptions.length > 0 && (
+          <>
+            {!activeHead && (
+              <p className="muscle-panel__head-hint">
+                Elegí una cabeza o zona para ver sus ejercicios específicos.
+              </p>
+            )}
+            <div className="muscle-panel__heads" role="tablist" aria-label="Cabezas o zonas">
+              {headOptions.map((head) => (
+                <button
+                  key={head.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeHead?.id === head.id}
+                  className={`muscle-panel__head-chip${activeHead?.id === head.id ? ' muscle-panel__head-chip--active' : ''}`}
+                  onClick={() => onHeadSelect?.(head.id)}
+                >
+                  {head.name}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
         {recovery && (
           <div className="muscle-panel__insights">
@@ -176,7 +210,7 @@ export function MusclePanel({
           )}
           {onOpenDetail && (
             <button type="button" className="muscle-panel__action-btn muscle-panel__action-btn--ghost" onClick={onOpenDetail}>
-              Ver anatomía
+              {headOptions.length > 0 ? 'Ver en el diagrama' : 'Ver anatomía'}
             </button>
           )}
         </div>

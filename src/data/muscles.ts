@@ -3,8 +3,8 @@ import type { Muscle } from '../types'
 export const muscles: Muscle[] = [
   {
     id: 'upper-chest',
-    name: 'Pectoral superior',
-    description: 'Fibra clavicular del pectoral mayor. Responde bien a ángulos inclinados.',
+    name: 'Pectoral clavicular',
+    description: 'Porción superior: fibras desde la clavícula. Responde bien a ángulos inclinados.',
     view: 'front',
     exercises: [
       {
@@ -108,6 +108,70 @@ export const muscles: Muscle[] = [
         ],
       },
       {
+        name: 'Press inclinado en máquina',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'pectorals/lever-incline-chest-press.gif',
+            illustration: 'incline-press',
+            formGuide:
+              'Espalda pegada al respaldo, banco a 30-45°. Empuja los agarres hacia arriba y adelante. Aprieta el pecho superior al final del recorrido.',
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'mid-chest',
+    name: 'Pectoral esternal',
+    description: 'Porción central del pecho: fibras que nacen del esternón. Es el grueso del pectoral; responde al press plano y aperturas.',
+    view: 'front',
+    exercises: [
+      {
+        name: 'Press plano',
+        sets: '4',
+        reps: '8-12',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'pectorals/barbell-bench-press.gif',
+            illustration: 'decline-press',
+            formGuide:
+              'Banco plano, agarre al ancho de hombros. Baja la barra al pecho con codos a 45°. Empuja en línea recta apretando el pecho al final.',
+          },
+          {
+            equipment: 'dumbbell',
+            gifFile: 'pectorals/dumbbell-bench-press.gif',
+            illustration: 'decline-press',
+            formGuide:
+              'Mancuernas en banco plano. Baja hasta sentir estiramiento en el pecho. Empuja convergiendo sin perder control de los hombros.',
+          },
+        ],
+      },
+      {
+        name: 'Aperturas planas',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'pectorals/dumbbell-fly.gif',
+            illustration: 'cable-fly',
+            formGuide:
+              'En banco plano. Abre los brazos con codos semiflexionados. Siente el estiramiento en el pecho medio y junta sin chocar las mancuernas.',
+          },
+          {
+            equipment: 'machine',
+            gifFile: 'pectorals/lever-seated-fly.gif',
+            illustration: 'cable-fly',
+            formGuide:
+              'Pecho contra el respaldo, brazos a la altura del pecho. Empuja hacia el centro en arco. No dejes que el peso te abra de golpe.',
+          },
+        ],
+      },
+      {
         name: 'Cruces en polea media',
         sets: '3',
         reps: '12-15',
@@ -128,26 +192,12 @@ export const muscles: Muscle[] = [
           },
         ],
       },
-      {
-        name: 'Press inclinado en máquina',
-        sets: '3',
-        reps: '10-12',
-        variants: [
-          {
-            equipment: 'machine',
-            gifFile: 'pectorals/lever-incline-chest-press.gif',
-            illustration: 'incline-press',
-            formGuide:
-              'Espalda pegada al respaldo, banco a 30-45°. Empuja los agarres hacia arriba y adelante. Aprieta el pecho superior al final del recorrido.',
-          },
-        ],
-      },
     ],
   },
   {
     id: 'lower-chest',
-    name: 'Pectoral inferior',
-    description: 'Porción esternal inferior. Se enfatiza con movimientos en declive.',
+    name: 'Pectoral costal',
+    description: 'Porción inferior hacia las costillas. Se enfatiza con movimientos en declive y fondos.',
     view: 'front',
     exercises: [
       {
@@ -172,7 +222,7 @@ export const muscles: Muscle[] = [
         ],
       },
       {
-        name: 'Aperturas / cruces',
+        name: 'Cruces en polea baja',
         sets: '3',
         reps: '12-15',
         variants: [
@@ -182,20 +232,6 @@ export const muscles: Muscle[] = [
             illustration: 'cable-fly',
             formGuide:
               'Poleas altas, paso adelante para estabilidad. Junta las manos abajo y adelante en arco. Pecho alto y core activo.',
-          },
-          {
-            equipment: 'dumbbell',
-            gifFile: 'pectorals/dumbbell-fly.gif',
-            illustration: 'cable-fly',
-            formGuide:
-              'En banco plano o declive. Abre los brazos con codos semiflexionados. Siente el estiramiento en la parte baja del pecho.',
-          },
-          {
-            equipment: 'machine',
-            gifFile: 'pectorals/lever-seated-fly.gif',
-            illustration: 'cable-fly',
-            formGuide:
-              'Pecho contra el respaldo. Empuja los brazos hacia el centro en arco. No dejes que el peso te abra de golpe.',
           },
         ],
       },
@@ -210,27 +246,6 @@ export const muscles: Muscle[] = [
             illustration: 'dip',
             formGuide:
               'Torso ligeramente inclinado. Baja controlado y sube sin bloquear bruscamente. Activa el pecho inferior al empujar.',
-          },
-        ],
-      },
-      {
-        name: 'Press plano con barra',
-        sets: '4',
-        reps: '8-12',
-        variants: [
-          {
-            equipment: 'barbell',
-            gifFile: 'pectorals/barbell-bench-press.gif',
-            illustration: 'decline-press',
-            formGuide:
-              'Banco plano, agarre al ancho de hombros. Baja la barra al pecho con codos a 45°. Empuja en línea recta apretando el pecho al final.',
-          },
-          {
-            equipment: 'dumbbell',
-            gifFile: 'pectorals/dumbbell-bench-press.gif',
-            illustration: 'decline-press',
-            formGuide:
-              'Mancuernas en banco plano. Baja hasta sentir estiramiento en el pecho. Empuja convergiendo sin perder control de los hombros.',
           },
         ],
       },
@@ -392,9 +407,87 @@ export const muscles: Muscle[] = [
     ],
   },
   {
+    id: 'side-deltoid',
+    name: 'Deltoides lateral',
+    description: 'Cabeza media del hombro. Da el ancho y la “bola” vista de frente.',
+    view: 'front',
+    exercises: [
+      {
+        name: 'Elevaciones laterales',
+        sets: '4',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'dumbbell',
+            gifFile: 'delts/dumbbell-lateral-raise.gif',
+            illustration: 'front-raise',
+            formGuide:
+              'Codos ligeramente flexionados. Elevá los brazos a los costados hasta casi paralelo al suelo. Meñique un poco más alto que el pulgar; no encojas trapecios.',
+          },
+          {
+            equipment: 'cable',
+            gifFile: 'delts/cable-lateral-raise.gif',
+            illustration: 'front-raise',
+            formGuide:
+              'Polea baja, de costado al aparato. Elevá el brazo en arco lateral con tensión constante. Controlá la bajada.',
+          },
+        ],
+      },
+      {
+        name: 'Elevaciones laterales en polea',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'cable',
+            gifFile: 'delts/cable-lateral-raise.gif',
+            illustration: 'front-raise',
+            formGuide:
+              'De pie en polea baja. Elevá el brazo en arco lateral con tensión constante. Controlá la bajada sin encoger trapecios.',
+          },
+        ],
+      },
+      {
+        name: 'Remo al mentón amplio',
+        sets: '3',
+        reps: '10-12',
+        variants: [
+          {
+            equipment: 'barbell',
+            gifFile: 'delts/barbell-upright-row.gif',
+            illustration: 'upright-row',
+            formGuide:
+              'Agarre más amplio que los hombros. Tirás la barra hacia el pecho alto con codos arriba. No subas por encima de los hombros si duele.',
+          },
+          {
+            equipment: 'cable',
+            gifFile: 'delts/cable-upright-row.gif',
+            illustration: 'upright-row',
+            formGuide:
+              'Polea baja con barra. Tirás a la altura del pecho alto, codos más altos que las muñecas. Core firme.',
+          },
+        ],
+      },
+      {
+        name: 'Elevaciones laterales en máquina',
+        sets: '3',
+        reps: '12-15',
+        variants: [
+          {
+            equipment: 'machine',
+            gifFile: 'delts/lever-lateral-raise.gif',
+            illustration: 'front-raise',
+            formGuide:
+              'Ajustá el asiento para alinear el eje con el hombro. Elevá hasta casi paralelo sin encoger el cuello.',
+          },
+        ],
+      },
+    ],
+  },
+  {
     id: 'biceps',
-    name: 'Bíceps braquial',
-    description: 'Flexión de codo y supinación. Trabaja cabeza larga y corta.',
+    name: 'Bíceps',
+    description: 'Dos cabezas (larga y corta). Debajo está el braquial, que también flexiona el codo.',
     view: 'front',
     exercises: [
       {

@@ -108,10 +108,17 @@ export interface MuscleDetailConfig {
   muscleId: string
   title: string
   subtitle: string
-  /** viewBox del overlay — coincide con el crop de MuscleMap. */
+  /** viewBox del overlay — coincide con el crop de MuscleMap o el esquemático. */
   overlayViewBox: string
   /** Eje X para espejar zonas al brazo/pierna derecha. */
   mirrorCenterX: number
+  /** Si false, no se espejan las zonas (ej. abdomen central). Default true. */
+  bilateral?: boolean
+  /**
+   * body-crop = zoom MuscleMap del cuerpo
+   * arm-front / arm-back = diagrama de un solo brazo (más claro para cabezas)
+   */
+  detailVisual?: 'body-crop' | 'arm-front' | 'arm-back'
   heads: MuscleHead[]
 }
 
