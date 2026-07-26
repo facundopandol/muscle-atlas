@@ -130,6 +130,11 @@
   pointer-events: none;
 }
 
+.progress-view__map-row path[aria-label^='CHEST_'] {
+  stroke: transparent !important;
+  stroke-width: 0 !important;
+}
+
 .progress-view__table-wrap h3 {
   margin: 0 0 0.5rem;
   font-size: 0.95rem;

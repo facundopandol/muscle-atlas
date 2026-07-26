@@ -1,28 +1,29 @@
 import { useMemo, useState } from 'react'
-import { BodyDiagram } from './components/BodyDiagram'
 import { Dashboard } from './components/Dashboard'
-import { MuscleDetailView } from './components/MuscleDetailView'
+import { ExploreCards, type ExploreLevel } from './components/ExploreCards'
 import { MusclePanel } from './components/MusclePanel'
 import { MuscleSearch } from './components/MuscleSearch'
 import { AppNav } from './components/AppNav'
-import { BodyHalfFilterBar } from './components/BodyHalfFilter'
 import { WorkoutLogger } from './components/WorkoutLogger'
 import { ProgressView } from './components/ProgressView'
 import type { SearchResult } from './lib/searchIndex'
-import { muscleMatchesBodyHalf } from './lib/bodyHalf'
-import { getDefaultHeadId, getMuscleDetail, hasClickableHeads } from './data/muscleHeads'
+import { getMuscleBodyHalf } from './lib/bodyHalf'
+import { getMuscleDetail } from './data/muscleHeads'
+import { EXPLORE_GROUPS } from './data/exploreHierarchy'
 import { muscleMap } from './data/muscles'
 import { getDayRoutineCount } from './lib/trainingStorage'
-import type { AppMode, AppSection, BodyHalfFilter, BodyView, ExerciseFocus } from './types'
+import type { AppSection, BodyHalfFilter, ExerciseFocus } from './types'
 import './App.css'
+
+function findGroupForMuscle(muscleId: string) {
+  return EXPLORE_GROUPS.find((g) => g.muscleIds.includes(muscleId))
+}
 
 function App() {
   const [section, setSection] = useState<AppSection>('dashboard')
-  const [bodyHalfFilter, setBodyHalfFilter] = useState<BodyHalfFilter>('all')
-  const [view, setView] = useState<BodyView>('front')
-  const [mode, setMode] = useState<AppMode>({ type: 'body' })
+  const [exploreLevel, setExploreLevel] = useState<ExploreLevel>({ step: 'half' })
   const [selectedMuscleId, setSelectedMuscleId] = useState<string | null>(null)
-  const [hoveredMuscleId, setHoveredMuscleId] = useState<string | null>(null)
+  const [selectedHeadId, setSelectedHeadId] = useState<string | null>(null)
   const [exerciseFocus, setExerciseFocus] = useState<ExerciseFocus | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
   const [routineRefreshKey, setRoutineRefreshKey] = useState(0)
@@ -33,23 +34,13 @@ function App() {
     [routineRefreshKey, refreshKey],
   )
 
-  const detailMuscleId = mode.type === 'detail' ? mode.muscleId : null
-  const activeHeadId = mode.type === 'detail' ? mode.headId : null
+  const displayMuscle = selectedMuscleId ? muscleMap.get(selectedMuscleId) ?? null : null
+  const detailConfig = selectedMuscleId ? getMuscleDetail(selectedMuscleId) : undefined
+  const headOptions = detailConfig?.heads ?? []
+  const activeHead = headOptions.find((h) => h.id === selectedHeadId) ?? null
 
-  const panelMuscleId =
-    mode.type === 'detail' ? detailMuscleId : hoveredMuscleId ?? selectedMuscleId
-  const displayMuscle = panelMuscleId ? muscleMap.get(panelMuscleId) ?? null : null
-
-  const detailConfig = detailMuscleId ? getMuscleDetail(detailMuscleId) : undefined
-  const activeHead = detailConfig?.heads.find((h) => h.id === activeHeadId) ?? detailConfig?.heads[0] ?? null
-
-  const viewMuscles = useMemo(
-    () =>
-      [...muscleMap.values()].filter(
-        (m) => m.view === view && muscleMatchesBodyHalf(m.id, bodyHalfFilter),
-      ),
-    [view, bodyHalfFilter],
-  )
+  const bodyHalfFilter: BodyHalfFilter =
+    exploreLevel.step === 'half' ? 'all' : exploreLevel.half
 
   function bumpRefresh() {
     setRefreshKey((k) => k + 1)
@@ -59,62 +50,64 @@ function App() {
     setRoutineRefreshKey((k) => k + 1)
   }
 
-  function openMuscleDetail(muscleId: string, requiredView?: BodyView) {
-    const muscle = muscleMap.get(muscleId)
-    const nextView = requiredView ?? muscle?.view ?? 'front'
-    setSection('explore')
-    setView(nextView)
+  function clearMuscleSelection() {
+    setSelectedMuscleId(null)
+    setSelectedHeadId(null)
     setExerciseFocus(null)
-    setHoveredMuscleId(null)
+  }
+
+  function handleLevelChange(level: ExploreLevel) {
+    setExploreLevel(level)
+    if (level.step === 'half' || level.step === 'groups') {
+      clearMuscleSelection()
+      return
+    }
+    if (level.step === 'muscles') {
+      // Al subir de cabezas a músculos, limpiar cabeza pero no forzar músculo
+      setSelectedHeadId(null)
+      setExerciseFocus(null)
+    }
+  }
+
+  function handleSelectMuscle(muscleId: string) {
     setSelectedMuscleId(muscleId)
-    const defaultHead = getDefaultHeadId(muscleId)
-    setMode({ type: 'detail', muscleId, headId: defaultHead })
+    setSelectedHeadId(null)
+    setExerciseFocus(null)
+  }
+
+  function handleSelectHead(muscleId: string, headId: string) {
+    setSelectedMuscleId(muscleId)
+    setSelectedHeadId(headId)
+    setExerciseFocus(null)
   }
 
   function handleSearchSelect(result: SearchResult) {
     setSection('explore')
-    setView(result.view)
+    const group = findGroupForMuscle(result.muscleId)
+    const half = getMuscleBodyHalf(result.muscleId)
+    if (group) {
+      const heads = getMuscleDetail(result.muscleId)?.heads ?? []
+      if (heads.length > 0) {
+        setExploreLevel({
+          step: 'heads',
+          half,
+          groupId: group.id,
+          muscleId: result.muscleId,
+        })
+      } else {
+        setExploreLevel({ step: 'muscles', half, groupId: group.id })
+      }
+    } else {
+      setExploreLevel({ step: 'half' })
+    }
+
     setSelectedMuscleId(result.muscleId)
+    setSelectedHeadId(null)
     setExerciseFocus(
       result.exerciseName || result.equipment
         ? { exerciseName: result.exerciseName, equipment: result.equipment }
         : null,
     )
-    const defaultHead = getDefaultHeadId(result.muscleId)
-    setMode({ type: 'detail', muscleId: result.muscleId, headId: defaultHead })
-  }
-
-  function handleBackToBody() {
-    setMode({ type: 'body' })
-    setExerciseFocus(null)
-  }
-
-  function handleHeadSelect(headId: string) {
-    if (mode.type !== 'detail') return
-    setMode({ ...mode, headId })
-  }
-
-  function openMuscleHead(muscleId: string, headId: string, requiredView?: BodyView) {
-    const muscle = muscleMap.get(muscleId)
-    setSection('explore')
-    setView(requiredView ?? muscle?.view ?? 'front')
-    setExerciseFocus(null)
-    setHoveredMuscleId(null)
-    setSelectedMuscleId(muscleId)
-    setMode({ type: 'detail', muscleId, headId })
-  }
-
-  function handleMuscleSelectFromMap(muscleId: string, requiredView: BodyView) {
-    if (hasClickableHeads(muscleId)) {
-      openMuscleDetail(muscleId, requiredView)
-      return
-    }
-    const muscle = muscleMap.get(muscleId)
-    setView(requiredView ?? muscle?.view ?? 'front')
-    setSelectedMuscleId(muscleId)
-    setHoveredMuscleId(null)
-    setMode({ type: 'body' })
-    setExerciseFocus(null)
   }
 
   function handleStartRoutine(muscleId: string) {
@@ -125,16 +118,14 @@ function App() {
   function handleSectionChange(next: AppSection) {
     setSection(next)
     if (next !== 'explore') {
-      setMode({ type: 'body' })
       setExerciseFocus(null)
-      setHoveredMuscleId(null)
     }
   }
 
   const subtitleBySection: Record<AppSection, string> = {
     dashboard: 'Tu resumen de entrenamiento, récords y mapa de recuperación.',
     explore:
-      'Cuerpo interactivo: colores según recuperación. Clic en un músculo para ver stats y armar rutina.',
+      'Navegá por tren, grupo y músculo. Pensado para el celular: tocá cards, sin mapa.',
     routines: 'Registrá peso, series, repeticiones, descanso y notas de cada ejercicio.',
     progress: 'Compara tus entrenamientos semana a semana o mes a mes.',
   }
@@ -170,94 +161,26 @@ function App() {
 
         {section === 'explore' && (
           <>
-            <div className="app__explore-toolbar">
-              <BodyHalfFilterBar value={bodyHalfFilter} onChange={setBodyHalfFilter} />
-
-              <div className="view-controls">
-                <button
-                  type="button"
-                  className={`view-btn${view === 'front' ? ' view-btn--active' : ''}`}
-                  onClick={() => setView('front')}
-                  disabled={mode.type === 'detail'}
-                >
-                  Vista frontal
-                </button>
-                <button
-                  type="button"
-                  className={`view-btn${view === 'back' ? ' view-btn--active' : ''}`}
-                  onClick={() => setView('back')}
-                  disabled={mode.type === 'detail'}
-                >
-                  Vista posterior
-                </button>
-              </div>
-            </div>
-
-            <section className="app__diagram-section">
-              {mode.type === 'body' ? (
-                <BodyDiagram
-                  view={view}
-                  bodyHalfFilter={bodyHalfFilter}
-                  selectedMuscleId={selectedMuscleId}
-                  hoveredMuscleId={hoveredMuscleId}
-                  refreshKey={refreshKey}
-                  onMuscleHover={setHoveredMuscleId}
-                  onMuscleSelect={handleMuscleSelectFromMap}
-                />
-              ) : (
-                <MuscleDetailView
-                  muscleId={mode.muscleId}
-                  activeHeadId={mode.headId}
-                  onHeadSelect={handleHeadSelect}
-                  onBack={handleBackToBody}
-                />
-              )}
-
-              {mode.type === 'body' && (
-                <div className="muscle-chips" aria-label="Músculos elegibles">
-                  {viewMuscles.map((muscle) => {
-                    const detail = getMuscleDetail(muscle.id)
-                    const active = (hoveredMuscleId ?? selectedMuscleId) === muscle.id
-                    return (
-                      <button
-                        key={muscle.id}
-                        type="button"
-                        className={`muscle-chip${active ? ' muscle-chip--active' : ''}`}
-                        onMouseEnter={() => setHoveredMuscleId(muscle.id)}
-                        onMouseLeave={() => setHoveredMuscleId(null)}
-                        onClick={() => handleMuscleSelectFromMap(muscle.id, muscle.view)}
-                      >
-                        {detail?.title ?? muscle.name}
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
+            <section className="app__explore-cards-section">
+              <ExploreCards
+                level={exploreLevel}
+                selectedMuscleId={selectedMuscleId}
+                selectedHeadId={selectedHeadId}
+                onLevelChange={handleLevelChange}
+                onSelectMuscle={handleSelectMuscle}
+                onSelectHead={handleSelectHead}
+              />
             </section>
 
             <MusclePanel
               muscle={displayMuscle}
-              activeHead={mode.type === 'detail' ? activeHead : null}
-              headOptions={
-                displayMuscle && hasClickableHeads(displayMuscle.id)
-                  ? getMuscleDetail(displayMuscle.id)?.heads ?? []
-                  : []
-              }
-              pinned={mode.type === 'detail'}
-              preview={mode.type === 'body' && hoveredMuscleId !== null && !selectedMuscleId}
+              activeHead={activeHead}
+              headOptions={[]}
+              pinned={Boolean(selectedMuscleId)}
+              preview={false}
               exerciseFocus={exerciseFocus}
               refreshKey={refreshKey}
-              onOpenDetail={
-                selectedMuscleId && mode.type === 'body'
-                  ? () => openMuscleDetail(selectedMuscleId)
-                  : undefined
-              }
-              onHeadSelect={
-                displayMuscle && hasClickableHeads(displayMuscle.id)
-                  ? (headId) => openMuscleHead(displayMuscle.id, headId, displayMuscle.view)
-                  : undefined
-              }
-              onStartRoutine={mode.type === 'body' ? handleStartRoutine : undefined}
+              onStartRoutine={selectedMuscleId ? handleStartRoutine : undefined}
               onDayRoutineChange={bumpRoutineRefresh}
               onGoToWorkout={() => setSection('routines')}
             />
@@ -267,7 +190,13 @@ function App() {
         {section === 'routines' && (
           <WorkoutLogger
             bodyHalfFilter={bodyHalfFilter}
-            onBodyHalfChange={setBodyHalfFilter}
+            onBodyHalfChange={(filter) => {
+              if (filter === 'upper' || filter === 'lower') {
+                setExploreLevel({ step: 'groups', half: filter })
+              } else {
+                setExploreLevel({ step: 'half' })
+              }
+            }}
             initialMuscleIds={routineMuscleIds}
             routineRefreshKey={routineRefreshKey}
             onRoutineChange={bumpRoutineRefresh}

@@ -109,6 +109,11 @@
   overflow: hidden;
 }
 
+.app__explore-cards-section {
+  width: 100%;
+  min-width: 0;
+}
+
 .view-controls {
   display: flex;
   gap: 0.5rem;

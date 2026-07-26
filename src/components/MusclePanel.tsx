@@ -117,10 +117,10 @@ export function MusclePanel({
       <aside className="muscle-panel muscle-panel--empty">
         <div className="muscle-panel__placeholder">
           <span className="muscle-panel__icon" aria-hidden="true">◉</span>
-          <h2>Explora el cuerpo</h2>
+          <h2>Elegí un músculo</h2>
           <p>
-            Los músculos se colorean según cuándo los entrenaste. Haz clic en una zona para ver
-            volumen, recuperación y armar tu rutina.
+            Navegá por tren superior o inferior, abrí un grupo y tocá un músculo para ver ejercicios
+            y recuperación acá.
           </p>
         </div>
       </aside>
@@ -146,36 +146,25 @@ export function MusclePanel({
         <span className="muscle-panel__badge">
           {pinned ? 'Músculo activo' : preview ? 'Vista previa' : 'Selección'}
         </span>
-        <h2>
-          {activeHead
-            ? activeHead.name
-            : headOptions.length > 0
-              ? `${muscle.name}: elegí una zona`
-              : muscle.name}
-        </h2>
+        <h2>{activeHead ? `${muscle.name} · ${activeHead.name}` : muscle.name}</h2>
+
+        {activeHead && <p className="muscle-panel__head-hint">{activeHead.description}</p>}
 
         {headOptions.length > 0 && (
-          <>
-            {!activeHead && (
-              <p className="muscle-panel__head-hint">
-                Elegí una cabeza o zona para ver sus ejercicios específicos.
-              </p>
-            )}
-            <div className="muscle-panel__heads" role="tablist" aria-label="Cabezas o zonas">
-              {headOptions.map((head) => (
-                <button
-                  key={head.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeHead?.id === head.id}
-                  className={`muscle-panel__head-chip${activeHead?.id === head.id ? ' muscle-panel__head-chip--active' : ''}`}
-                  onClick={() => onHeadSelect?.(head.id)}
-                >
-                  {head.name}
-                </button>
-              ))}
-            </div>
-          </>
+          <div className="muscle-panel__heads" role="tablist" aria-label="Cabezas o zonas">
+            {headOptions.map((head) => (
+              <button
+                key={head.id}
+                type="button"
+                role="tab"
+                aria-selected={activeHead?.id === head.id}
+                className={`muscle-panel__head-chip${activeHead?.id === head.id ? ' muscle-panel__head-chip--active' : ''}`}
+                onClick={() => onHeadSelect?.(head.id)}
+              >
+                {head.name}
+              </button>
+            ))}
+          </div>
         )}
 
         {recovery && (
@@ -228,7 +217,6 @@ export function MusclePanel({
 
         {addMsg && <p className="muscle-panel__toast">{addMsg}</p>}
 
-        {activeHead && <p className="muscle-panel__desc">{activeHead.description}</p>}
         {!activeHead && <p className="muscle-panel__desc">{muscle.description}</p>}
       </header>
 

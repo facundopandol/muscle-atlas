@@ -19,6 +19,13 @@
   padding: 1rem 0.5rem;
 }
 
+/* MuscleMap traza stroke blanco en cada path del grupo activo; en pecho partido
+   eso dibuja la “escalera” entre clavicular / esternal / costal. Solo el fill. */
+.body-diagram--musclemap path[aria-label^='CHEST_'] {
+  stroke: transparent !important;
+  stroke-width: 0 !important;
+}
+
 @media (prefers-color-scheme: dark) {
   .body-diagram--musclemap .body-diagram__stage {
     background: radial-gradient(ellipse at 50% 30%, #3a342c 0%, #2a2520 70%);

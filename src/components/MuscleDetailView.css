@@ -75,54 +75,15 @@
   height: auto !important;
 }
 
-.muscle-detail__visual > svg:first-of-type {
+.muscle-detail__visual--static > svg,
+.muscle-detail__visual--static > svg path {
   pointer-events: none !important;
 }
 
-.muscle-detail__visual > svg:first-of-type path {
-  pointer-events: none !important;
-}
-
-.muscle-detail__overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  overflow: visible;
-  pointer-events: auto;
-}
-
-.head-hit-layer {
-  pointer-events: all;
-}
-
-.head-hit {
-  fill: rgba(224, 112, 48, 0.12);
-  stroke: rgba(224, 112, 48, 0.45);
-  stroke-width: 1.2;
-  stroke-linejoin: round;
-  cursor: pointer;
-  pointer-events: all;
-  transition: fill 0.15s ease, stroke 0.15s ease;
-}
-
-.head-hit:hover {
-  fill: rgba(224, 112, 48, 0.42);
-  stroke: rgba(120, 50, 15, 0.9);
-  stroke-width: 1.8;
-}
-
-.head-hit--active {
-  fill: rgba(224, 112, 48, 0.68);
-  stroke: #7a2e0a;
-  stroke-width: 2;
-  filter: drop-shadow(0 0 5px rgba(184, 92, 40, 0.4));
-}
-
-.head-hit:focus-visible {
-  outline: 2px solid var(--accent, #c47848);
-  outline-offset: 1px;
+/* Misma regla que BodyDiagram: sin stroke blanco entre porciones del pecho. */
+.muscle-detail__visual path[aria-label^='CHEST_'] {
+  stroke: transparent !important;
+  stroke-width: 0 !important;
 }
 
 .muscle-detail__head-card {

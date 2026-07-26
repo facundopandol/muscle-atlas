@@ -1,15 +1,16 @@
-import { useMemo, type MouseEvent, type PointerEvent } from 'react'
+import { useMemo } from 'react'
 import type { MuscleGroup, MuscleMapValues } from '@musclemap/core'
 import { getVisibleMuscleGroups } from '@musclemap/core'
 import maleFront from '@musclemap/assets/bodies/male-front.webp'
 import maleBack from '@musclemap/assets/bodies/male-back.webp'
 import { BodyFigure, type PartValues } from '@musclemap/react'
 import type { MuscleHead } from '../types'
-import { getMuscleDetail, hasClickableHeads } from '../data/muscleHeads'
+import { getMuscleDetail } from '../data/muscleHeads'
 import { muscleMap } from '../data/muscles'
 import { getAtlasBodyDiagram } from '../lib/chestDiagram'
 import {
   buildChestPartValues,
+  chestPartToMuscleId,
   getDetailCropViewBox,
   getMuscleDetailMmConfig,
   highlightChestParts,
@@ -22,92 +23,28 @@ interface MuscleDetailViewProps {
   muscleId: string
   activeHeadId: string | null
   onHeadSelect: (headId: string) => void
+  /** Cambia a otra porción muscular (ej. clavicular → esternal) desde el diagrama. */
+  onMuscleSelect?: (muscleId: string) => void
   onBack: () => void
 }
 
 const FIGURE_WIDTH = 340
 
-function mirrorTransform(centerX: number) {
-  return `translate(${centerX}, 0) scale(-1, 1) translate(${-centerX}, 0)`
-}
-
-function selectHead(onHeadSelect: (id: string) => void, headId: string) {
-  return (e: MouseEvent | PointerEvent) => {
-    e.stopPropagation()
-    onHeadSelect(headId)
-  }
-}
-
-function HeadHitAreas({
-  heads,
+export function MuscleDetailView({
+  muscleId,
   activeHeadId,
-  mirrorCenterX,
-  bilateral,
   onHeadSelect,
-}: {
-  heads: MuscleHead[]
-  activeHeadId: string | null
-  mirrorCenterX: number
-  bilateral: boolean
-  onHeadSelect: (headId: string) => void
-}) {
-  return (
-    <g className="head-hit-layer">
-      {heads.map((head) => {
-        const isActive = head.id === activeHeadId
-        const className = `head-hit${isActive ? ' head-hit--active' : ''}`
-
-        return head.paths.map((d, i) => (
-          <g key={`${head.id}-${i}`}>
-            <path
-              className={className}
-              d={d}
-              role="button"
-              tabIndex={0}
-              aria-label={head.name}
-              onPointerDown={selectHead(onHeadSelect, head.id)}
-              onClick={selectHead(onHeadSelect, head.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  onHeadSelect(head.id)
-                }
-              }}
-            />
-            {bilateral && (
-              <path
-                className={className}
-                d={d}
-                transform={mirrorTransform(mirrorCenterX)}
-                role="button"
-                tabIndex={0}
-                aria-label={`${head.name} (lado derecho)`}
-                onPointerDown={selectHead(onHeadSelect, head.id)}
-                onClick={selectHead(onHeadSelect, head.id)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault()
-                    onHeadSelect(head.id)
-                  }
-                }}
-              />
-            )}
-          </g>
-        ))
-      })}
-    </g>
-  )
-}
-
-export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack }: MuscleDetailViewProps) {
+  onMuscleSelect,
+  onBack,
+}: MuscleDetailViewProps) {
   const config = getMuscleDetail(muscleId)
   const muscle = muscleMap.get(muscleId)
   const mmConfig = getMuscleDetailMmConfig(muscleId)
   const cropViewBox = getDetailCropViewBox(muscleId)
   const activeHead = config?.heads.find((h) => h.id === activeHeadId) ?? config?.heads[0] ?? null
-  const clickableHeads = hasClickableHeads(muscleId)
   const useArmSchematic =
     config?.detailVisual === 'arm-front' || config?.detailVisual === 'arm-back'
+  const chestInteractive = mmConfig?.group === 'CHEST' && !!onMuscleSelect
 
   const cropParts = useMemo(() => {
     if (!cropViewBox) return null
@@ -119,11 +56,6 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
     if (!mmConfig) return null
     return getAtlasBodyDiagram('MALE', mmConfig.view === 'FRONT' ? 'FRONT' : 'BACK')
   }, [mmConfig])
-
-  const mirrorCenterX = useMemo(() => {
-    if (!diagram || !cropParts) return config?.mirrorCenterX ?? FIGURE_WIDTH / 2
-    return diagram.centerX - cropParts.vbX
-  }, [diagram, cropParts, config?.mirrorCenterX])
 
   const visibleGroups = useMemo((): ReadonlySet<MuscleGroup> => {
     if (!mmConfig) return new Set<MuscleGroup>()
@@ -142,6 +74,12 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
     return highlightChestParts(base, muscleId, 88)
   }, [mmConfig, muscleId])
 
+  function handlePartSelect(_group: MuscleGroup, partId?: string) {
+    if (!chestInteractive) return
+    const next = chestPartToMuscleId(partId)
+    if (next && next !== muscleId) onMuscleSelect?.(next)
+  }
+
   return (
     <div className="muscle-detail">
       <div className="muscle-detail__toolbar">
@@ -152,9 +90,8 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
           <h2>{config?.title ?? muscle?.name ?? muscleId}</h2>
           <p>
             {config?.subtitle ??
-              (clickableHeads
-                ? 'Haz clic en una cabeza del diagrama'
-                : muscle?.description ?? 'Vista ampliada del músculo')}
+              muscle?.description ??
+              'Vista ampliada del músculo'}
           </p>
         </div>
       </div>
@@ -169,7 +106,7 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
           />
         ) : mmConfig && diagram && cropViewBox ? (
           <div
-            className="muscle-detail__visual"
+            className={`muscle-detail__visual${chestInteractive ? '' : ' muscle-detail__visual--static'}`}
             style={
               cropParts
                 ? { aspectRatio: `${cropParts.vbW} / ${cropParts.vbH}` }
@@ -194,36 +131,17 @@ export function MuscleDetailView({ muscleId, activeHeadId, onHeadSelect, onBack 
               backgroundOpacity={0.4}
               backgroundBrightness={1.2}
               onHover={() => undefined}
-              onSelect={() => undefined}
+              onSelect={handlePartSelect}
             />
-
-            {config && clickableHeads && cropParts && (
-              <svg
-                className="muscle-detail__overlay"
-                viewBox={cropViewBox}
-                preserveAspectRatio="xMidYMid meet"
-                aria-label="Cabezas musculares seleccionables"
-              >
-                <g transform={`translate(${cropParts.vbX}, ${cropParts.vbY})`}>
-                  <HeadHitAreas
-                    heads={config.heads}
-                    activeHeadId={activeHead?.id ?? null}
-                    mirrorCenterX={mirrorCenterX}
-                    bilateral={config.bilateral !== false}
-                    onHeadSelect={onHeadSelect}
-                  />
-                </g>
-              </svg>
-            )}
           </div>
         ) : (
           <p className="muscle-detail__fallback-msg">Vista ampliada no disponible.</p>
         )}
 
-        {activeHead && <HeadInfoCard head={activeHead} />}
+        {useArmSchematic && activeHead && <HeadInfoCard head={activeHead} />}
       </div>
 
-      {config && config.heads.length > 1 && (
+      {useArmSchematic && config && config.heads.length > 1 && (
         <div className="muscle-detail__head-chips" role="tablist" aria-label="Cabezas musculares">
           {config.heads.map((head) => (
             <button
