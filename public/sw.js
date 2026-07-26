@@ -1,5 +1,8 @@
-const CACHE = 'muscle-atlas-shell-v1'
-const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg']
+const CACHE = 'muscle-atlas-shell-v2'
+const SCOPE = self.registration.scope
+const SHELL = ['', 'index.html', 'manifest.webmanifest', 'favicon.svg'].map(
+  (path) => new URL(path, SCOPE).href,
+)
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -23,15 +26,17 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
 
+  const indexUrl = new URL('index.html', SCOPE).href
+
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then((response) => {
           const copy = response.clone()
-          void caches.open(CACHE).then((cache) => cache.put('/index.html', copy))
+          void caches.open(CACHE).then((cache) => cache.put(indexUrl, copy))
           return response
         })
-        .catch(() => caches.match('/index.html').then((r) => r || Response.error())),
+        .catch(() => caches.match(indexUrl).then((r) => r || Response.error())),
     )
     return
   }
