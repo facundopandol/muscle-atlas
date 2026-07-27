@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { ExerciseIllustration } from './ExerciseIllustration'
-import { inferExerciseMeta, CATEGORY_LABELS, PATTERN_LABELS } from '../lib/exerciseMeta'
 import { EQUIPMENT_LABELS, type Equipment, type Exercise, type ExerciseFocus } from '../types'
 import { gifUrl } from '../lib/gifs'
 import './ExerciseCard.css'
@@ -29,7 +28,6 @@ export function ExerciseCard({
 }: ExerciseCardProps) {
   const [variantIndex, setVariantIndex] = useState(0)
   const [gifFailed, setGifFailed] = useState(false)
-  const meta = inferExerciseMeta(exercise.name)
 
   const variant = exercise.variants[variantIndex]
   const hasMultipleVariants = exercise.variants.length > 1
@@ -99,11 +97,6 @@ export function ExerciseCard({
               </button>
             )}
           </div>
-        </div>
-
-        <div className="exercise-card__tags">
-          <span>{CATEGORY_LABELS[meta.category]}</span>
-          <span>{PATTERN_LABELS[meta.pattern]}</span>
         </div>
 
         <div className="exercise-card__meta">

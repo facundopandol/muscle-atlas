@@ -7,6 +7,8 @@ import {
 } from '../data/exploreHierarchy'
 import { muscleMap } from '../data/muscles'
 import type { MuscleHead } from '../types'
+import { CardCarousel, ExploreShell, type CarouselSlide } from './CardCarousel'
+import { AnatomyThumb } from './AnatomyThumb'
 import './ExploreCards.css'
 
 export type ExploreLevel =
@@ -28,6 +30,13 @@ function headsForMuscle(muscleId: string): MuscleHead[] {
   return getMuscleDetail(muscleId)?.heads ?? []
 }
 
+function levelKey(level: ExploreLevel): string {
+  if (level.step === 'half') return 'half'
+  if (level.step === 'groups') return `groups-${level.half}`
+  if (level.step === 'muscles') return `muscles-${level.half}-${level.groupId}`
+  return `heads-${level.half}-${level.groupId}-${level.muscleId}`
+}
+
 export function ExploreCards({
   level,
   selectedMuscleId,
@@ -36,7 +45,9 @@ export function ExploreCards({
   onSelectMuscle,
   onSelectHead,
 }: ExploreCardsProps) {
-  const crumbs: Array<{ label: string; go?: () => void }> = [{ label: 'Explorar', go: () => onLevelChange({ step: 'half' }) }]
+  const crumbs: Array<{ label: string; go?: () => void }> = [
+    { label: 'Explorar', go: () => onLevelChange({ step: 'half' }) },
+  ]
 
   if (level.step !== 'half') {
     const halfMeta = EXPLORE_HALVES.find((h) => h.id === level.half)
@@ -59,167 +70,123 @@ export function ExploreCards({
     crumbs.push({ label: muscle?.name ?? level.muscleId })
   }
 
-  return (
-    <section className="explore-cards">
-      <nav className="explore-cards__crumbs" aria-label="Navegación">
-        {crumbs.map((c, i) => (
-          <span key={`${c.label}-${i}`} className="explore-cards__crumb">
-            {i > 0 && <span className="explore-cards__sep">/</span>}
-            {c.go && i < crumbs.length - 1 ? (
-              <button type="button" className="explore-cards__crumb-btn" onClick={c.go}>
-                {c.label}
-              </button>
-            ) : (
-              <span className="explore-cards__crumb-current">{c.label}</span>
-            )}
-          </span>
-        ))}
-      </nav>
+  let title = ''
+  let subtitle = ''
+  let slides: CarouselSlide[] = []
 
-      {level.step !== 'half' && (
-        <button
-          type="button"
-          className="explore-cards__back"
-          onClick={() => {
-            if (level.step === 'heads') {
-              onLevelChange({ step: 'muscles', half: level.half, groupId: level.groupId })
-            } else if (level.step === 'muscles') {
-              onLevelChange({ step: 'groups', half: level.half })
-            } else {
-              onLevelChange({ step: 'half' })
+  if (level.step === 'half') {
+    title = '¿Qué vas a entrenar?'
+    subtitle = 'Deslizá las cards y tocá para elegir tren superior o inferior.'
+    slides = EXPLORE_HALVES.map((half) => ({
+      key: half.id,
+      label: half.label,
+      description: half.description,
+      variant: 'half',
+      onSelect: () => onLevelChange({ step: 'groups', half: half.id }),
+    }))
+  } else if (level.step === 'groups') {
+    title = 'Grupos musculares'
+    subtitle = 'Deslizá y tocá un grupo para ver sus músculos.'
+    slides = groupsForHalf(level.half).map((group) => ({
+      key: group.id,
+      label: group.label,
+      description: group.description,
+      accentLabel: true,
+      visual: <AnatomyThumb kind="group" groupId={group.id} />,
+      onSelect: () =>
+        onLevelChange({ step: 'muscles', half: level.half, groupId: group.id }),
+    }))
+  } else if (level.step === 'muscles') {
+    const group = getExploreGroup(level.groupId)
+    title = group?.label ?? 'Músculos'
+    subtitle = 'Deslizá y elegí el músculo. Si tiene cabezas, el siguiente paso las muestra.'
+    slides = (group?.muscleIds ?? []).flatMap((muscleId) => {
+      const muscle = muscleMap.get(muscleId)
+      if (!muscle) return []
+      const detail = getMuscleDetail(muscleId)
+      const heads = headsForMuscle(muscleId)
+      return [
+        {
+          key: muscleId,
+          label: detail?.title ?? muscle.name,
+          description: muscle.description,
+          accentLabel: true,
+          visual: <AnatomyThumb kind="muscle" muscleId={muscleId} />,
+          active: selectedMuscleId === muscleId,
+          onSelect: () => {
+            if (heads.length > 0) {
+              onLevelChange({
+                step: 'heads',
+                half: level.half,
+                groupId: level.groupId,
+                muscleId,
+              })
+              onSelectMuscle(muscleId)
+              return
             }
-          }}
-        >
-          ← Atrás
-        </button>
-      )}
+            onSelectMuscle(muscleId)
+          },
+        } satisfies CarouselSlide,
+      ]
+    })
+  } else {
+    const muscle = muscleMap.get(level.muscleId)
+    title = muscle?.name ?? 'Zonas'
+    subtitle = 'Deslizá y tocá la cabeza o zona. Los ejercicios salen en el panel.'
+    slides = [
+      ...headsForMuscle(level.muscleId).map(
+        (head): CarouselSlide => ({
+          key: head.id,
+          label: head.name,
+          description: head.description,
+          accentLabel: true,
+          visual: (
+            <AnatomyThumb kind="muscle" muscleId={level.muscleId} headId={head.id} />
+          ),
+          active: selectedMuscleId === level.muscleId && selectedHeadId === head.id,
+          onSelect: () => onSelectHead(level.muscleId, head.id),
+        }),
+      ),
+      {
+        key: 'all',
+        label: 'Ver todos',
+        description: 'Todos los ejercicios de este músculo',
+        variant: 'muted',
+        accentLabel: true,
+        visual: <AnatomyThumb kind="muscle" muscleId={level.muscleId} />,
+        active: selectedMuscleId === level.muscleId && !selectedHeadId,
+        onSelect: () => onSelectMuscle(level.muscleId),
+      },
+    ]
+  }
 
-      {level.step === 'half' && (
-        <>
-          <header className="explore-cards__header">
-            <h2>¿Qué vas a entrenar?</h2>
-            <p>Elegí tren superior o inferior. Después vas bajando por grupo y músculo.</p>
-          </header>
-          <div className="explore-cards__grid">
-            {EXPLORE_HALVES.map((half) => (
-              <button
-                key={half.id}
-                type="button"
-                className="explore-card explore-card--half"
-                onClick={() => onLevelChange({ step: 'groups', half: half.id })}
-              >
-                <span className="explore-card__label">{half.label}</span>
-                <span className="explore-card__desc">{half.description}</span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-
-      {level.step === 'groups' && (
-        <>
-          <header className="explore-cards__header">
-            <h2>Grupos musculares</h2>
-            <p>Tocá un grupo para ver sus músculos.</p>
-          </header>
-          <div className="explore-cards__grid">
-            {groupsForHalf(level.half).map((group) => (
-              <button
-                key={group.id}
-                type="button"
-                className="explore-card"
-                onClick={() =>
-                  onLevelChange({ step: 'muscles', half: level.half, groupId: group.id })
-                }
-              >
-                <span className="explore-card__label">{group.label}</span>
-                <span className="explore-card__desc">{group.description}</span>
-                <span className="explore-card__meta">{group.muscleIds.length} músculos</span>
-              </button>
-            ))}
-          </div>
-        </>
-      )}
-
-      {level.step === 'muscles' && (
-        <>
-          <header className="explore-cards__header">
-            <h2>{getExploreGroup(level.groupId)?.label ?? 'Músculos'}</h2>
-            <p>Elegí el músculo. Si tiene cabezas o zonas, las vas a ver en el siguiente paso.</p>
-          </header>
-          <div className="explore-cards__grid">
-            {(getExploreGroup(level.groupId)?.muscleIds ?? []).map((muscleId) => {
-              const muscle = muscleMap.get(muscleId)
-              if (!muscle) return null
-              const detail = getMuscleDetail(muscleId)
-              const heads = headsForMuscle(muscleId)
-              const active = selectedMuscleId === muscleId
-              return (
-                <button
-                  key={muscleId}
-                  type="button"
-                  className={`explore-card${active ? ' explore-card--active' : ''}`}
-                  onClick={() => {
-                    if (heads.length > 0) {
-                      onLevelChange({
-                        step: 'heads',
-                        half: level.half,
-                        groupId: level.groupId,
-                        muscleId,
-                      })
-                      onSelectMuscle(muscleId)
-                      return
-                    }
-                    onSelectMuscle(muscleId)
-                  }}
-                >
-                  <span className="explore-card__label">{detail?.title ?? muscle.name}</span>
-                  <span className="explore-card__desc">
-                    {heads.length > 0
-                      ? `${heads.length} zonas · ${muscle.exercises.length} ejercicios`
-                      : `${muscle.exercises.length} ejercicios`}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </>
-      )}
-
-      {level.step === 'heads' && (
-        <>
-          <header className="explore-cards__header">
-            <h2>{muscleMap.get(level.muscleId)?.name ?? 'Zonas'}</h2>
-            <p>Elegí la cabeza o zona. Los ejercicios aparecen a la derecha.</p>
-          </header>
-          <div className="explore-cards__grid">
-            {headsForMuscle(level.muscleId).map((head) => {
-              const active = selectedMuscleId === level.muscleId && selectedHeadId === head.id
-              return (
-                <button
-                  key={head.id}
-                  type="button"
-                  className={`explore-card${active ? ' explore-card--active' : ''}`}
-                  onClick={() => onSelectHead(level.muscleId, head.id)}
-                >
-                  <span className="explore-card__label">{head.name}</span>
-                  <span className="explore-card__desc">{head.description}</span>
-                </button>
-              )
-            })}
-            <button
-              type="button"
-              className={`explore-card explore-card--muted${
-                selectedMuscleId === level.muscleId && !selectedHeadId ? ' explore-card--active' : ''
-              }`}
-              onClick={() => onSelectMuscle(level.muscleId)}
-            >
-              <span className="explore-card__label">Ver todos</span>
-              <span className="explore-card__desc">Todos los ejercicios de este músculo</span>
-            </button>
-          </div>
-        </>
-      )}
-    </section>
+  return (
+    <ExploreShell
+      crumbs={crumbs}
+      onBack={
+        level.step === 'half'
+          ? undefined
+          : () => {
+              if (level.step === 'heads') {
+                onLevelChange({
+                  step: 'muscles',
+                  half: level.half,
+                  groupId: level.groupId,
+                })
+              } else if (level.step === 'muscles') {
+                onLevelChange({ step: 'groups', half: level.half })
+              } else {
+                onLevelChange({ step: 'half' })
+              }
+            }
+      }
+    >
+      <CardCarousel
+        title={title}
+        subtitle={subtitle}
+        slides={slides}
+        resetKey={levelKey(level)}
+      />
+    </ExploreShell>
   )
 }

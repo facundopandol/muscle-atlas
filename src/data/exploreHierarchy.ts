@@ -25,17 +25,19 @@ export const EXPLORE_HALVES: Array<{
   {
     id: 'lower',
     label: 'Tren inferior',
-    description: 'Cuádriceps, isquios, glúteos y pantorrillas',
+    description: 'Piernas, glúteos y pantorrillas',
   },
 ]
 
 const GROUP_META: Record<string, { description: string; half: ExploreHalf }> = {
-  chest: { description: 'Tres porciones: clavicular, esternal y costal', half: 'upper' },
+  chest: { description: 'Tres porciones: superior, esternal e inferior', half: 'upper' },
   shoulders: { description: 'Tres cabezas: anterior, lateral y posterior', half: 'upper' },
-  arms: { description: 'Bíceps, tríceps y antebrazos · con cabezas', half: 'upper' },
-  back: { description: 'Dorsales y trapecio (superior / medio / inferior)', half: 'upper' },
+  arms: { description: 'Bíceps, tríceps y antebrazos', half: 'upper' },
+  back: { description: 'Dorsales y trapecio', half: 'upper' },
   core: { description: 'Recto abdominal y oblicuos', half: 'upper' },
-  legs: { description: 'Cuádriceps, isquios, glúteos y pantorrillas · con cabezas', half: 'lower' },
+  legs: { description: 'Cuádriceps e isquiotibiales', half: 'lower' },
+  glutes: { description: 'Extensión de cadera y estabilidad', half: 'lower' },
+  calves: { description: 'Elevación de talón · gemelos y sóleo', half: 'lower' },
 }
 
 export const EXPLORE_GROUPS: ExploreGroup[] = MUSCLE_PICKER_GROUPS.map((g) => ({

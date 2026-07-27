@@ -1149,17 +1149,17 @@ export const muscles: Muscle[] = [
         variants: [
           {
             equipment: 'cable',
-            gifFile: 'delts/cable-standing-face-pull.gif',
+            gifFile: 'delts/cable-standing-rear-delt-row-with-rope.gif',
             illustration: 'face-pull',
             formGuide:
               'Cuerda a la altura del rostro. Tira hacia la frente separando las manos. Codos altos, escápulas juntas al final.',
           },
           {
             equipment: 'dumbbell',
-            gifFile: 'delts/dumbbell-rear-fly.gif',
+            gifFile: 'delts/dumbbell-rear-delt-row-shoulder.gif',
             illustration: 'face-pull',
             formGuide:
-              'Inclinado, brazos semiextendidos hacia atrás. Similar al pájaro pero con énfasis en rotación externa del hombro.',
+              'Inclinado, tirás las mancuernas hacia los hombros con codos altos y rotación externa. No es una apertura: el movimiento es de remo corto al deltoides posterior.',
           },
         ],
       },
@@ -1339,7 +1339,7 @@ export const muscles: Muscle[] = [
         variants: [
           {
             equipment: 'cable',
-            gifFile: 'delts/cable-standing-face-pull.gif',
+            gifFile: 'delts/cable-standing-rear-delt-row-with-rope.gif',
             illustration: 'face-pull',
             formGuide:
               'Cuerda a la altura del rostro. Tira hacia la frente separando las manos. Codos altos, escápulas juntas al final del recorrido.',

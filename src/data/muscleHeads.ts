@@ -304,32 +304,10 @@ export const muscleDetailMap = new Map<string, MuscleDetailConfig>([
     {
       muscleId: 'glutes',
       title: 'Glúteos',
-      subtitle: 'Máximo, medio y menor.',
+      subtitle: 'Todos los ejercicios de glúteos en un solo listado.',
       overlayViewBox: '0 0 663 862',
       mirrorCenterX: 332,
-      heads: [
-        head(
-          'glute-max',
-          'Glúteo mayor',
-          'El más grande. Extensión y rotación externa de cadera.',
-          'Hip thrust, puente y peso muerto. Extensión completa de cadera arriba.',
-          ['Hip thrust', 'Puente de glúteos', 'Peso muerto convencional'],
-        ),
-        head(
-          'glute-med',
-          'Glúteo medio',
-          'Lateral de la cadera. Abducción y estabilidad pélvica.',
-          'Abducción en máquina y patadas laterales / hacia atrás con control.',
-          ['Abducción de cadera en máquina', 'Patada de glúteo'],
-        ),
-        head(
-          'glute-min',
-          'Glúteo menor',
-          'Más profundo, bajo el medio. Estabiliza la cadera en unipodal.',
-          'Trabajo unilateral: búlgara y step-ups. Pelvis nivelada.',
-          ['Sentadilla búlgara', 'Subida al cajón con barra'],
-        ),
-      ],
+      heads: [],
     },
   ],
   [
@@ -337,32 +315,10 @@ export const muscleDetailMap = new Map<string, MuscleDetailConfig>([
     {
       muscleId: 'calves',
       title: 'Pantorrillas',
-      subtitle: 'Gastrocnemio (dos cabezas) y sóleo.',
+      subtitle: 'Todos los ejercicios de pantorrillas en un solo listado.',
       overlayViewBox: '0 0 663 862',
       mirrorCenterX: 332,
-      heads: [
-        head(
-          'gastroc-medial',
-          'Gastrocnemio medial',
-          'Cabeza interna del gemelo. Más visible con rodilla extendida.',
-          'Elevaciones de pie, pies un poco hacia afuera. Rango completo.',
-          ['Elevación de talones de pie', 'Elevación en prensa', 'Saltos de pantorrilla'],
-        ),
-        head(
-          'gastroc-lateral',
-          'Gastrocnemio lateral',
-          'Cabeza externa del gemelo. También se trabaja de pie.',
-          'Elevaciones de pie, pies un poco hacia adentro. Pausa arriba.',
-          ['Elevación de talones de pie', 'Elevación en prensa'],
-        ),
-        head(
-          'soleus',
-          'Sóleo',
-          'Debajo del gastrocnemio. Predomina con la rodilla flexionada.',
-          'Elevación de talones sentado. Rango completo sin rebotes.',
-          ['Elevación de talones sentado'],
-        ),
-      ],
+      heads: [],
     },
   ],
   [
@@ -370,39 +326,10 @@ export const muscleDetailMap = new Map<string, MuscleDetailConfig>([
     {
       muscleId: 'quadriceps',
       title: 'Cuádriceps',
-      subtitle: 'Cuatro cabezas: recto femoral y tres vastos.',
+      subtitle: 'Todos los ejercicios del cuádriceps en un solo listado.',
       overlayViewBox: '0 0 680 817',
       mirrorCenterX: 340,
-      heads: [
-        head(
-          'rectus-femoris',
-          'Recto femoral',
-          'La única que cruza la cadera. Flexiona cadera y extiende rodilla.',
-          'Sissy squat y zancadas. También extensiones con cadera más flexionada.',
-          ['Sentadilla sissy', 'Zancadas', 'Extensión de cuádriceps'],
-        ),
-        head(
-          'vastus-lateralis',
-          'Vasto lateral',
-          'Cara externa del muslo. Da el “sweep” externo.',
-          'Sentadillas y prensa con pies un poco más juntos / altos en la plataforma.',
-          ['Sentadilla', 'Prensa de piernas', 'Subida al cajón'],
-        ),
-        head(
-          'vastus-medialis',
-          'Vasto medial (VMO)',
-          'Cara interna cerca de la rodilla. Estabilidad de rótula.',
-          'Extensiones con énfasis al final del recorrido y sentadillas controladas.',
-          ['Extensión de cuádriceps', 'Sentadilla', 'Zancadas'],
-        ),
-        head(
-          'vastus-intermedius',
-          'Vasto intermedio',
-          'Debajo del recto femoral. Extiende la rodilla; difícil de aislar.',
-          'Compuestos generales: sentadilla, prensa y extensiones.',
-          ['Sentadilla', 'Prensa de piernas', 'Extensión de cuádriceps'],
-        ),
-      ],
+      heads: [],
     },
   ],
   [
@@ -410,32 +337,10 @@ export const muscleDetailMap = new Map<string, MuscleDetailConfig>([
     {
       muscleId: 'hamstrings',
       title: 'Isquiotibiales',
-      subtitle: 'Bíceps femoral, semitendinoso y semimembranoso.',
+      subtitle: 'Todos los ejercicios de isquios en un solo listado.',
       overlayViewBox: '0 0 663 862',
       mirrorCenterX: 331.5,
-      heads: [
-        head(
-          'biceps-femoris',
-          'Bíceps femoral',
-          'Cara externa (lateral) de la pierna posterior. Flexión de rodilla y rotación externa.',
-          'Curl femoral tumbado y Nordic curl. Cadera estable.',
-          ['Curl femoral', 'Nordic curl', 'Curl femoral de rodillas'],
-        ),
-        head(
-          'semitendinosus',
-          'Semitendinoso',
-          'Cara interna. Flexión de rodilla y extensión de cadera.',
-          'Peso muerto rumano y curl sentado. Bisagra de cadera limpia.',
-          ['Peso muerto rumano', 'Curl femoral sentado', 'Good morning'],
-        ),
-        head(
-          'semimembranosus',
-          'Semimembranoso',
-          'Más profundo en la cara interna. Estabilidad de rodilla y cadera.',
-          'GHR, good morning y curls con control excéntrico.',
-          ['Elevación glúteo-isquio (GHR)', 'Good morning', 'Curl femoral sentado'],
-        ),
-      ],
+      heads: [],
     },
   ],
 ])

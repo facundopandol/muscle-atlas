@@ -178,12 +178,6 @@ export interface PeriodComparison {
   }
 }
 
-export type ExerciseLevel = 'beginner' | 'intermediate' | 'advanced'
-
-export type MovementPattern = 'push' | 'pull' | 'hinge' | 'squat' | 'core' | 'isolation'
-
-export type ExerciseCategory = 'compound' | 'isolation'
-
 export interface LoggedSet {
   weightKg: number
   reps: number

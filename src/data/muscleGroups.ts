@@ -32,6 +32,16 @@ export const MUSCLE_PICKER_GROUPS: Array<{
   {
     id: 'legs',
     label: 'Piernas',
-    muscleIds: ['quadriceps', 'hamstrings', 'glutes', 'calves'],
+    muscleIds: ['quadriceps', 'hamstrings'],
+  },
+  {
+    id: 'glutes',
+    label: 'Glúteos',
+    muscleIds: ['glutes'],
+  },
+  {
+    id: 'calves',
+    label: 'Pantorrillas',
+    muscleIds: ['calves'],
   },
 ]
