@@ -30,8 +30,16 @@ export function ExerciseCard({
   const [gifFailed, setGifFailed] = useState(false)
 
   const variant = exercise.variants[variantIndex]
-  const hasMultipleVariants = exercise.variants.length > 1
+  const uniqueEquipments = [
+    ...new Set(exercise.variants.map((v) => v.equipment)),
+  ] as Equipment[]
+  const hasMultipleEquipments = uniqueEquipments.length > 1
   const inRoutine = isInRoutine?.(variant.equipment) ?? false
+
+  function selectEquipment(equipment: Equipment) {
+    const index = exercise.variants.findIndex((v) => v.equipment === equipment)
+    if (index >= 0) selectVariant(index)
+  }
 
   useEffect(() => {
     if (!focus) return
@@ -104,23 +112,23 @@ export function ExerciseCard({
           <span>{exercise.reps} reps</span>
         </div>
 
-        {hasMultipleVariants && (
+        {hasMultipleEquipments && (
           <div className="equipment-picker" role="group" aria-label="Equipo para este ejercicio">
-            {exercise.variants.map((v, i) => (
+            {uniqueEquipments.map((equipment) => (
               <button
-                key={v.gifFile}
+                key={equipment}
                 type="button"
-                className={`equipment-picker__btn${i === variantIndex ? ' equipment-picker__btn--active' : ''}`}
-                onClick={() => selectVariant(i)}
-                aria-pressed={i === variantIndex}
+                className={`equipment-picker__btn${variant.equipment === equipment ? ' equipment-picker__btn--active' : ''}`}
+                onClick={() => selectEquipment(equipment)}
+                aria-pressed={variant.equipment === equipment}
               >
-                {EQUIPMENT_LABELS[v.equipment]}
+                {EQUIPMENT_LABELS[equipment]}
               </button>
             ))}
           </div>
         )}
 
-        {!hasMultipleVariants && (
+        {!hasMultipleEquipments && (
           <span className="exercise-card__equipment-tag">
             {EQUIPMENT_LABELS[variant.equipment]}
           </span>
