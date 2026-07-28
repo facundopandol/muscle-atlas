@@ -69,6 +69,7 @@
 
 /* —— Carousel —— */
 .explore-carousel {
+  --explore-card-visual-height: min(19.5rem, 48svh);
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
@@ -94,7 +95,8 @@
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
-  touch-action: pan-x;
+  /* pan-y permite deslizar la página hacia abajo aunque el dedo empiece sobre la card */
+  touch-action: pan-x pan-y;
   padding: 0.25rem 0 0.5rem;
   margin: 0;
   scrollbar-width: none;
@@ -121,8 +123,11 @@
   min-height: 9.5rem;
 }
 
+/* Misma altura fija para todas las cards con imagen (evita que una SVG alta distorsione el carrusel) */
 .explore-carousel__slide.explore-card--with-visual {
-  min-height: 18.5rem;
+  height: var(--explore-card-visual-height);
+  min-height: var(--explore-card-visual-height);
+  max-height: var(--explore-card-visual-height);
 }
 
 .explore-card {
@@ -171,23 +176,33 @@
 }
 
 .explore-card--with-visual {
-  min-height: 18.5rem;
-  gap: 0.55rem;
+  height: var(--explore-card-visual-height);
+  min-height: var(--explore-card-visual-height);
+  max-height: var(--explore-card-visual-height);
+  gap: 0.45rem;
+  overflow: hidden;
 }
 
 .explore-card__visual {
   width: 100%;
-  flex: 1 1 auto;
-  min-height: 9.5rem;
+  flex: 1 1 0;
+  min-height: 0;
   display: flex;
+  overflow: hidden;
 }
 
 .explore-card__visual > * {
   width: 100%;
-  flex: 1;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 0;
 }
 
 .explore-card--with-visual .explore-card__label {
+  flex: 0 0 auto;
+}
+
+.explore-card--with-visual .explore-card__desc {
   flex: 0 0 auto;
 }
 
@@ -227,8 +242,20 @@
 }
 
 .explore-card--with-visual .explore-card__desc {
-  min-height: 4.05rem;
-  -webkit-line-clamp: 3;
+  min-height: 2.7rem;
+  -webkit-line-clamp: 2;
+}
+
+@media (max-width: 720px) {
+  .explore-card {
+    --explore-card-visual-height: min(18rem, 46svh);
+    padding: 0.95rem 0.9rem;
+  }
+
+  .explore-card--with-visual .explore-card__desc {
+    min-height: 2.6rem;
+    font-size: 0.85rem;
+  }
 }
 
 .explore-card__meta {
