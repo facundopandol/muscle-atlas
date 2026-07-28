@@ -247,8 +247,11 @@
 }
 
 @media (max-width: 720px) {
-  .explore-card {
+  .explore-carousel {
     --explore-card-visual-height: min(18rem, 46svh);
+  }
+
+  .explore-card {
     padding: 0.95rem 0.9rem;
   }
 
