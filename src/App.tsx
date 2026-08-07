@@ -126,7 +126,7 @@ function App() {
     dashboard: 'Tu resumen de entrenamiento, récords y mapa de recuperación.',
     explore:
       'Navegá por tren, grupo y músculo. Pensado para el celular: tocá cards, sin mapa.',
-    routines: 'Registrá peso, series, repeticiones, descanso y notas de cada ejercicio.',
+    routines: 'Sesión en lista vertical: demo grande, series grandes y sumá ejercicios al final.',
     progress: 'Compara tus entrenamientos semana a semana o mes a mes.',
   }
 

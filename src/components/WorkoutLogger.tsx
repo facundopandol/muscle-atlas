@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { MUSCLE_PICKER_GROUPS } from '../data/muscleGroups'
-import { muscles } from '../data/muscles'
+import { muscles, muscleMap } from '../data/muscles'
 import { buildWorkoutPlan } from '../lib/routines'
 import { saveSession, loadDayRoutine, clearDayRoutine, removeFromDayRoutine, loadFavorites } from '../lib/trainingStorage'
 import { muscleMatchesBodyHalf } from '../lib/bodyHalf'
 import { exerciseKey } from '../lib/exerciseKey'
+import { resolveExerciseDemo } from '../lib/exerciseDemo'
+import { gifUrl } from '../lib/gifs'
 import { EQUIPMENT_LABELS } from '../types'
 import type { BodyHalfFilter, DayRoutineItem, Equipment, LoggedExercise, LoggedSet, PersonalRecord } from '../types'
 import { BodyHalfFilterBar } from './BodyHalfFilter'
+import { ExerciseIllustration } from './ExerciseIllustration'
 import './WorkoutLogger.css'
 
 interface WorkoutLoggerProps {
@@ -59,6 +62,25 @@ function planToLogged(plan: ReturnType<typeof buildWorkoutPlan>): LoggedExercise
   })
 }
 
+function exerciseToLogged(
+  muscleId: string,
+  exerciseName: string,
+  equipment: Equipment,
+  sets: string,
+  reps: string,
+): LoggedExercise {
+  const setCount = parseInt(sets, 10) || 3
+  const repNum = parseInt(reps.split('-')[0], 10) || 10
+  return {
+    id: crypto.randomUUID(),
+    muscleId,
+    exerciseName,
+    equipment,
+    sets: Array.from({ length: setCount }, () => ({ weightKg: 0, reps: repNum, restSec: 90 })),
+    notes: '',
+  }
+}
+
 export function WorkoutLogger({
   bodyHalfFilter,
   onBodyHalfChange,
@@ -73,6 +95,10 @@ export function WorkoutLogger({
   const [fromDayRoutine, setFromDayRoutine] = useState(false)
   const [savedMsg, setSavedMsg] = useState<string | null>(null)
   const [newPrs, setNewPrs] = useState<PersonalRecord[]>([])
+  const [doneSets, setDoneSets] = useState<Record<string, boolean>>({})
+  const [gifFailed, setGifFailed] = useState<Record<string, boolean>>({})
+  const [addOpen, setAddOpen] = useState(false)
+  const [addMuscleId, setAddMuscleId] = useState<string | null>(null)
 
   const favorites = useMemo(() => loadFavorites(), [savedMsg])
   const draftCount = useMemo(() => loadDayRoutine().length, [routineRefreshKey, savedMsg])
@@ -136,10 +162,25 @@ export function WorkoutLogger({
     })).filter((g) => g.muscles.length > 0)
   }, [availableMuscles])
 
+  const addMuscleOptions = useMemo(() => {
+    const preferred = selectedIds
+      .map((id) => muscleMap.get(id))
+      .filter((m): m is NonNullable<typeof m> => Boolean(m))
+    if (preferred.length > 0) return preferred
+    return availableMuscles
+  }, [selectedIds, availableMuscles])
+
+  const addMuscle = addMuscleId ? muscleMap.get(addMuscleId) ?? null : null
+  const existingKeys = useMemo(
+    () => new Set(exercises.map((e) => exerciseKey(e.muscleId, e.exerciseName, e.equipment))),
+    [exercises],
+  )
+
   function toggleMuscle(muscleId: string) {
     setSavedMsg(null)
     setNewPrs([])
     setExercises([])
+    setDoneSets({})
     setSelectedIds((prev) => {
       if (prev.includes(muscleId)) return prev.filter((id) => id !== muscleId)
       if (prev.length >= MAX_MUSCLES) return prev
@@ -152,6 +193,10 @@ export function WorkoutLogger({
     const plan = buildWorkoutPlan(selectedIds, dayLabel)
     setExercises(planToLogged(plan))
     setFromDayRoutine(false)
+    setDoneSets({})
+    setGifFailed({})
+    setAddOpen(false)
+    setAddMuscleId(null)
     setSavedMsg(null)
     setNewPrs([])
   }
@@ -162,6 +207,10 @@ export function WorkoutLogger({
     setSelectedIds([])
     setFromDayRoutine(false)
     setDayLabel('')
+    setDoneSets({})
+    setGifFailed({})
+    setAddOpen(false)
+    setAddMuscleId(null)
     setSavedMsg(null)
     setNewPrs([])
     onRoutineChange?.()
@@ -176,6 +225,13 @@ export function WorkoutLogger({
         onRoutineChange?.()
       }
       setSelectedIds(muscleIdsFromExercises(next))
+      return next
+    })
+    setDoneSets((prev) => {
+      const next = { ...prev }
+      for (const key of Object.keys(next)) {
+        if (key.startsWith(`${exId}:`)) delete next[key]
+      }
       return next
     })
   }
@@ -207,6 +263,11 @@ export function WorkoutLogger({
         return { ...ex, sets: ex.sets.filter((_, i) => i !== setIdx) }
       }),
     )
+    setDoneSets((prev) => {
+      const next = { ...prev }
+      delete next[`${exId}:${setIdx}`]
+      return next
+    })
   }
 
   function updateNotes(exId: string, notes: string) {
@@ -215,6 +276,26 @@ export function WorkoutLogger({
 
   function updateEquipment(exId: string, equipment: Equipment) {
     setExercises((prev) => prev.map((ex) => (ex.id === exId ? { ...ex, equipment } : ex)))
+    setGifFailed((prev) => {
+      const next = { ...prev }
+      delete next[exId]
+      return next
+    })
+  }
+
+  function toggleSetDone(exId: string, setIdx: number) {
+    const key = `${exId}:${setIdx}`
+    setDoneSets((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  function handleAddExercise(muscleId: string, exerciseName: string, equipment: Equipment, sets: string, reps: string) {
+    const key = exerciseKey(muscleId, exerciseName, equipment)
+    if (existingKeys.has(key)) return
+    setExercises((prev) => [...prev, exerciseToLogged(muscleId, exerciseName, equipment, sets, reps)])
+    setAddOpen(true)
+    setAddMuscleId(muscleId)
+    setSavedMsg(null)
+    setNewPrs([])
   }
 
   function handleSave() {
@@ -236,6 +317,10 @@ export function WorkoutLogger({
     setExercises([])
     setSelectedIds([])
     setDayLabel('')
+    setDoneSets({})
+    setGifFailed({})
+    setAddOpen(false)
+    setAddMuscleId(null)
     onRoutineChange?.()
     onWorkoutSaved?.(prs)
   }
@@ -243,17 +328,22 @@ export function WorkoutLogger({
   return (
     <div className="workout-logger">
       <header className="workout-logger__header">
-        <h2>Registrar entrenamiento</h2>
-        <p>Elegí ejercicios en Explorar o armá por músculos, y cargá peso, series y repeticiones.</p>
+        <h2>Tu sesión</h2>
+        <p>
+          Lista de ejercicios de arriba a abajo: demo grande, registro de series y sumá más en el mismo
+          flujo.
+        </p>
       </header>
 
-      <BodyHalfFilterBar value={bodyHalfFilter} onChange={onBodyHalfChange} />
+      {exercises.length === 0 && (
+        <BodyHalfFilterBar value={bodyHalfFilter} onChange={onBodyHalfChange} />
+      )}
 
       {exercises.length === 0 ? (
         <>
           {draftCount === 0 && (
             <p className="workout-logger__hint">
-              Tip: en Explorar, cada ejercicio tiene el botón «Agregar a rutina del día».
+              Tip: en Explorar podés agregar ejercicios, o armá la sesión acá por músculos.
             </p>
           )}
 
@@ -305,7 +395,7 @@ export function WorkoutLogger({
             disabled={selectedIds.length === 0}
             onClick={handleBuild}
           >
-            Armar rutina
+            Empezar sesión
           </button>
         </>
       ) : (
@@ -313,11 +403,10 @@ export function WorkoutLogger({
           <div className="workout-logger__session-head">
             <div>
               <h3>{dayLabel.trim() || 'Rutina del día'}</h3>
-              {fromDayRoutine && (
-                <p className="workout-logger__session-source">
-                  {exercises.length} ejercicio{exercises.length === 1 ? '' : 's'} elegidos en Explorar
-                </p>
-              )}
+              <p className="workout-logger__session-source">
+                {exercises.length} ejercicio{exercises.length === 1 ? '' : 's'}
+                {fromDayRoutine ? ' · desde Explorar' : ''}
+              </p>
             </div>
             <button
               type="button"
@@ -328,33 +417,40 @@ export function WorkoutLogger({
             </button>
           </div>
 
-          {exercises.map((ex) => {
-            const fav = favorites.has(exerciseKey(ex.muscleId, ex.exerciseName, ex.equipment))
-            return (
-              <article key={ex.id} className="workout-logger__exercise">
-                <header className="workout-logger__ex-head">
-                  <div>
-                    <span className="workout-logger__ex-muscle">
-                      {muscles.find((m) => m.id === ex.muscleId)?.name}
-                    </span>
-                    <strong>
-                      {ex.exerciseName}
-                      {fav && <span className="workout-logger__fav" title="Favorito"> ★</span>}
-                    </strong>
+          <ol className="workout-logger__stack">
+            {exercises.map((ex, order) => {
+              const fav = favorites.has(exerciseKey(ex.muscleId, ex.exerciseName, ex.equipment))
+              const demo = resolveExerciseDemo(ex.muscleId, ex.exerciseName, ex.equipment)
+              const failed = gifFailed[ex.id]
+              const muscleName = muscles.find((m) => m.id === ex.muscleId)?.name
+
+              return (
+                <li key={ex.id} className="workout-logger__exercise">
+                  <div className="workout-logger__ex-order" aria-hidden="true">
+                    {order + 1}
                   </div>
-                  <div className="workout-logger__ex-actions">
-                    <select
-                      className="workout-logger__equip"
-                      value={ex.equipment}
-                      onChange={(e) => updateEquipment(ex.id, e.target.value as Equipment)}
-                    >
-                      {(Object.keys(EQUIPMENT_LABELS) as Equipment[]).map((eq) => (
-                        <option key={eq} value={eq}>
-                          {EQUIPMENT_LABELS[eq]}
-                        </option>
-                      ))}
-                    </select>
-                    {fromDayRoutine && (
+
+                  <header className="workout-logger__ex-head">
+                    <div>
+                      <span className="workout-logger__ex-muscle">{muscleName}</span>
+                      <strong>
+                        {ex.exerciseName}
+                        {fav && <span className="workout-logger__fav" title="Favorito"> ★</span>}
+                      </strong>
+                    </div>
+                    <div className="workout-logger__ex-actions">
+                      <select
+                        className="workout-logger__equip"
+                        value={ex.equipment}
+                        onChange={(e) => updateEquipment(ex.id, e.target.value as Equipment)}
+                        aria-label="Equipo"
+                      >
+                        {(Object.keys(EQUIPMENT_LABELS) as Equipment[]).map((eq) => (
+                          <option key={eq} value={eq}>
+                            {EQUIPMENT_LABELS[eq]}
+                          </option>
+                        ))}
+                      </select>
                       <button
                         type="button"
                         className="workout-logger__remove-ex"
@@ -363,57 +459,91 @@ export function WorkoutLogger({
                       >
                         Quitar
                       </button>
+                    </div>
+                  </header>
+
+                  <div className="workout-logger__demo">
+                    {demo && !failed ? (
+                      <img
+                        src={gifUrl(demo.variant.gifFile)}
+                        alt={`Demostración: ${ex.exerciseName}`}
+                        className="workout-logger__gif"
+                        loading="lazy"
+                        onError={() => setGifFailed((prev) => ({ ...prev, [ex.id]: true }))}
+                      />
+                    ) : demo ? (
+                      <div className="workout-logger__illustration">
+                        <ExerciseIllustration id={demo.variant.illustration} title={ex.exerciseName} />
+                      </div>
+                    ) : (
+                      <div className="workout-logger__demo-fallback">Sin demo</div>
+                    )}
+                    {demo && (
+                      <p className="workout-logger__form-guide">{demo.variant.formGuide}</p>
                     )}
                   </div>
-                </header>
 
-                <table className="workout-logger__table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Kg</th>
-                      <th>Reps</th>
-                      <th>Desc.</th>
-                      <th />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ex.sets.map((set, idx) => (
-                      <tr key={idx}>
-                        <td>{idx + 1}</td>
-                        <td>
+                  <div className="workout-logger__sets" role="list">
+                    <div className="workout-logger__sets-head" aria-hidden="true">
+                      <span />
+                      <span>Kg</span>
+                      <span>Reps</span>
+                      <span>Desc.</span>
+                      <span />
+                    </div>
+                    {ex.sets.map((set, idx) => {
+                      const setKey = `${ex.id}:${idx}`
+                      const done = Boolean(doneSets[setKey])
+                      return (
+                        <div
+                          key={idx}
+                          className={`workout-logger__set-row${done ? ' workout-logger__set-row--done' : ''}`}
+                          role="listitem"
+                        >
+                          <button
+                            type="button"
+                            className={`workout-logger__set-check${done ? ' workout-logger__set-check--on' : ''}`}
+                            aria-pressed={done}
+                            aria-label={done ? `Serie ${idx + 1} hecha` : `Marcar serie ${idx + 1}`}
+                            onClick={() => toggleSetDone(ex.id, idx)}
+                          >
+                            {idx + 1}
+                          </button>
                           <input
                             type="number"
+                            inputMode="decimal"
                             min={0}
                             step={0.5}
+                            className="workout-logger__num"
                             value={set.weightKg || ''}
+                            placeholder="0"
                             onChange={(e) =>
                               updateSet(ex.id, idx, 'weightKg', parseFloat(e.target.value) || 0)
                             }
                           />
-                        </td>
-                        <td>
                           <input
                             type="number"
+                            inputMode="numeric"
                             min={0}
+                            className="workout-logger__num"
                             value={set.reps || ''}
+                            placeholder="0"
                             onChange={(e) =>
                               updateSet(ex.id, idx, 'reps', parseInt(e.target.value, 10) || 0)
                             }
                           />
-                        </td>
-                        <td>
                           <input
                             type="number"
+                            inputMode="numeric"
                             min={0}
                             step={15}
+                            className="workout-logger__num workout-logger__num--rest"
                             value={set.restSec ?? ''}
+                            placeholder="90"
                             onChange={(e) =>
                               updateSet(ex.id, idx, 'restSec', parseInt(e.target.value, 10) || 0)
                             }
                           />
-                        </td>
-                        <td>
                           <button
                             type="button"
                             className="workout-logger__remove-set"
@@ -422,28 +552,117 @@ export function WorkoutLogger({
                           >
                             ×
                           </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      )
+                    })}
+                  </div>
 
-                <button type="button" className="workout-logger__add-set" onClick={() => addSet(ex.id)}>
-                  + Serie
-                </button>
+                  <button type="button" className="workout-logger__add-set" onClick={() => addSet(ex.id)}>
+                    + Serie
+                  </button>
 
-                <label className="workout-logger__notes">
-                  Notas
-                  <input
-                    type="text"
-                    placeholder="Técnica, sensaciones…"
-                    value={ex.notes ?? ''}
-                    onChange={(e) => updateNotes(ex.id, e.target.value)}
-                  />
-                </label>
-              </article>
-            )
-          })}
+                  <label className="workout-logger__notes">
+                    Notas
+                    <input
+                      type="text"
+                      placeholder="Técnica, sensaciones…"
+                      value={ex.notes ?? ''}
+                      onChange={(e) => updateNotes(ex.id, e.target.value)}
+                    />
+                  </label>
+                </li>
+              )
+            })}
+          </ol>
+
+          <div className="workout-logger__add-block">
+            {!addOpen ? (
+              <button
+                type="button"
+                className="workout-logger__add-open"
+                onClick={() => {
+                  setAddOpen(true)
+                  setAddMuscleId(addMuscleOptions[0]?.id ?? null)
+                }}
+              >
+                + Agregar ejercicio
+              </button>
+            ) : (
+              <div className="workout-logger__add-panel">
+                <div className="workout-logger__add-panel-head">
+                  <h4>Agregar al final de la lista</h4>
+                  <button
+                    type="button"
+                    className="workout-logger__back"
+                    onClick={() => {
+                      setAddOpen(false)
+                      setAddMuscleId(null)
+                    }}
+                  >
+                    Cerrar
+                  </button>
+                </div>
+
+                <p className="workout-logger__add-label">Músculo</p>
+                <div className="workout-logger__add-muscles" role="group" aria-label="Elegir músculo">
+                  {addMuscleOptions.map((muscle) => (
+                    <button
+                      key={muscle.id}
+                      type="button"
+                      className={`workout-logger__muscle${addMuscleId === muscle.id ? ' workout-logger__muscle--selected' : ''}`}
+                      aria-pressed={addMuscleId === muscle.id}
+                      onClick={() => setAddMuscleId(muscle.id)}
+                    >
+                      {muscle.name}
+                    </button>
+                  ))}
+                </div>
+
+                {addMuscle && (
+                  <ul className="workout-logger__add-list">
+                    {addMuscle.exercises.map((exercise) => {
+                      const variant = exercise.variants[0]
+                      if (!variant) return null
+                      const key = exerciseKey(addMuscle.id, exercise.name, variant.equipment)
+                      const already = existingKeys.has(key)
+                      return (
+                        <li key={exercise.name} className="workout-logger__add-item">
+                          <img
+                            src={gifUrl(variant.gifFile)}
+                            alt=""
+                            className="workout-logger__add-thumb"
+                            loading="lazy"
+                          />
+                          <div className="workout-logger__add-item-body">
+                            <strong>{exercise.name}</strong>
+                            <span>
+                              {EQUIPMENT_LABELS[variant.equipment]} · {exercise.sets}×{exercise.reps}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            className="workout-logger__add-pick"
+                            disabled={already}
+                            onClick={() =>
+                              handleAddExercise(
+                                addMuscle.id,
+                                exercise.name,
+                                variant.equipment,
+                                exercise.sets,
+                                exercise.reps,
+                              )
+                            }
+                          >
+                            {already ? 'Ya está' : 'Sumar'}
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
 
           <button type="button" className="workout-logger__save" onClick={handleSave}>
             Guardar entrenamiento
