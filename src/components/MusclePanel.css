@@ -1,13 +1,15 @@
 .muscle-panel {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  min-height: 520px;
+  border-radius: 18px;
+  padding: 1.25rem 1.15rem 1.4rem;
+  min-height: auto;
   width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.15rem;
   box-shadow: var(--shadow);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
@@ -134,12 +136,19 @@
 }
 
 .muscle-panel__exercises h3 {
-  margin: 0 0 0.75rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-h);
+}
+
+.muscle-panel__exercises-lead {
+  margin: 0 0 0.9rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
+  line-height: 1.4;
 }
 
 .muscle-panel__exercises ul {
@@ -148,20 +157,8 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 1.1rem;
   width: 100%;
-}
-
-.muscle-panel .exercise-card {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.muscle-panel .exercise-card__media {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .muscle-panel__attribution {

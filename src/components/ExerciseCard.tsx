@@ -66,16 +66,18 @@ export function ExerciseCard({
             onError={() => setGifFailed(true)}
           />
         ) : (
-          <ExerciseIllustration id={variant.illustration} title={exercise.name} />
+          <div className="exercise-card__illustration">
+            <ExerciseIllustration id={variant.illustration} title={exercise.name} />
+          </div>
         )}
         <span className="exercise-card__media-label">
-          {gifFailed ? 'Ilustración' : 'GIF · forma correcta'}
+          {gifFailed ? 'Ilustración · forma' : 'Demo · forma correcta'}
         </span>
       </div>
 
       <div className="exercise-card__body">
         <div className="exercise-card__title-row">
-          <div className="exercise-card__title">{exercise.name}</div>
+          <h4 className="exercise-card__title">{exercise.name}</h4>
           <div className="exercise-card__toolbar">
             {onToggleFavorite && (
               <button
@@ -104,7 +106,7 @@ export function ExerciseCard({
           <span>{exercise.reps} reps</span>
         </div>
 
-        {hasMultipleVariants && (
+        {hasMultipleVariants ? (
           <div className="equipment-picker" role="group" aria-label="Equipo para este ejercicio">
             {exercise.variants.map((v, i) => (
               <button
@@ -118,9 +120,7 @@ export function ExerciseCard({
               </button>
             ))}
           </div>
-        )}
-
-        {!hasMultipleVariants && (
+        ) : (
           <span className="exercise-card__equipment-tag">
             {EQUIPMENT_LABELS[variant.equipment]}
           </span>
@@ -133,7 +133,7 @@ export function ExerciseCard({
             onClick={() => onAddToRoutine(variant.equipment)}
             disabled={inRoutine}
           >
-            {inRoutine ? 'En tu rutina del día' : 'Agregar a rutina del día'}
+            {inRoutine ? 'Ya en tu sesión' : 'Sumar a la sesión'}
           </button>
         )}
 

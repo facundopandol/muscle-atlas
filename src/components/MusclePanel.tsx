@@ -221,7 +221,10 @@ export function MusclePanel({
       </header>
 
       <section className="muscle-panel__exercises">
-        <h3>Ejercicios ({shownExercises.length})</h3>
+        <h3>Ejercicios para sumar</h3>
+        <p className="muscle-panel__exercises-lead">
+          Lista de arriba a abajo: mirá la demo, elegí el equipo y sumalo a tu sesión.
+        </p>
         <ul ref={listRef}>
           {shownExercises.map((exercise) => {
             const isHighlighted =
