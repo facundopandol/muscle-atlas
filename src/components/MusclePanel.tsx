@@ -119,8 +119,8 @@ export function MusclePanel({
           <span className="muscle-panel__icon" aria-hidden="true">◉</span>
           <h2>Elegí un músculo</h2>
           <p>
-            Navegá por tren superior o inferior, abrí un grupo y tocá un músculo para ver ejercicios
-            y recuperación acá.
+            Tocá tren → grupo → músculo arriba. Acá vas a ver demos grandes y podés agregarlos
+            a la rutina del día.
           </p>
         </div>
       </aside>

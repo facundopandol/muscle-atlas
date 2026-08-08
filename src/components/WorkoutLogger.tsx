@@ -1,13 +1,31 @@
 import { useEffect, useMemo, useState } from 'react'
 import { MUSCLE_PICKER_GROUPS } from '../data/muscleGroups'
-import { muscles } from '../data/muscles'
+import { muscleMap, muscles } from '../data/muscles'
 import { buildWorkoutPlan } from '../lib/routines'
-import { saveSession, loadDayRoutine, clearDayRoutine, removeFromDayRoutine, loadFavorites } from '../lib/trainingStorage'
+import {
+  saveSession,
+  loadDayRoutine,
+  clearDayRoutine,
+  removeFromDayRoutine,
+  loadFavorites,
+  addToDayRoutine,
+} from '../lib/trainingStorage'
 import { muscleMatchesBodyHalf } from '../lib/bodyHalf'
 import { exerciseKey } from '../lib/exerciseKey'
+import { findCatalogExercise, resolveExerciseVariant } from '../lib/resolveExercise'
+import { gifUrl } from '../lib/gifs'
 import { EQUIPMENT_LABELS } from '../types'
-import type { BodyHalfFilter, DayRoutineItem, Equipment, LoggedExercise, LoggedSet, PersonalRecord } from '../types'
+import type {
+  BodyHalfFilter,
+  DayRoutineItem,
+  Equipment,
+  Exercise,
+  LoggedExercise,
+  LoggedSet,
+  PersonalRecord,
+} from '../types'
 import { BodyHalfFilterBar } from './BodyHalfFilter'
+import { ExerciseIllustration } from './ExerciseIllustration'
 import './WorkoutLogger.css'
 
 interface WorkoutLoggerProps {
@@ -59,6 +77,21 @@ function planToLogged(plan: ReturnType<typeof buildWorkoutPlan>): LoggedExercise
   })
 }
 
+function catalogToLogged(muscleId: string, exercise: Exercise, equipment: Equipment): LoggedExercise {
+  const setCount = parseInt(exercise.sets, 10) || 3
+  const repNum = parseInt(exercise.reps.split('-')[0], 10) || 10
+  const variant =
+    exercise.variants.find((v) => v.equipment === equipment) ?? exercise.variants[0]
+  return {
+    id: crypto.randomUUID(),
+    muscleId,
+    exerciseName: exercise.name,
+    equipment: variant.equipment,
+    sets: Array.from({ length: setCount }, () => ({ weightKg: 0, reps: repNum, restSec: 90 })),
+    notes: '',
+  }
+}
+
 export function WorkoutLogger({
   bodyHalfFilter,
   onBodyHalfChange,
@@ -73,6 +106,9 @@ export function WorkoutLogger({
   const [fromDayRoutine, setFromDayRoutine] = useState(false)
   const [savedMsg, setSavedMsg] = useState<string | null>(null)
   const [newPrs, setNewPrs] = useState<PersonalRecord[]>([])
+  const [addingExercise, setAddingExercise] = useState(false)
+  const [pickerMuscleId, setPickerMuscleId] = useState<string | null>(null)
+  const [gifFailedIds, setGifFailedIds] = useState<Set<string>>(() => new Set())
 
   const favorites = useMemo(() => loadFavorites(), [savedMsg])
   const draftCount = useMemo(() => loadDayRoutine().length, [routineRefreshKey, savedMsg])
@@ -136,6 +172,24 @@ export function WorkoutLogger({
     })).filter((g) => g.muscles.length > 0)
   }, [availableMuscles])
 
+  const sessionKeys = useMemo(
+    () => new Set(exercises.map((e) => exerciseKey(e.muscleId, e.exerciseName, e.equipment))),
+    [exercises],
+  )
+
+  const addPickerMuscles = useMemo(() => {
+    const preferred = selectedIds
+      .map((id) => muscleMap.get(id))
+      .filter((m): m is NonNullable<typeof m> => Boolean(m))
+    const rest = availableMuscles.filter((m) => !selectedIds.includes(m.id))
+    return [...preferred, ...rest]
+  }, [availableMuscles, selectedIds])
+
+  const pickerExercises = useMemo(() => {
+    if (!pickerMuscleId) return []
+    return muscleMap.get(pickerMuscleId)?.exercises ?? []
+  }, [pickerMuscleId])
+
   function toggleMuscle(muscleId: string) {
     setSavedMsg(null)
     setNewPrs([])
@@ -164,6 +218,8 @@ export function WorkoutLogger({
     setDayLabel('')
     setSavedMsg(null)
     setNewPrs([])
+    setAddingExercise(false)
+    setPickerMuscleId(null)
     onRoutineChange?.()
   }
 
@@ -171,7 +227,7 @@ export function WorkoutLogger({
     setExercises((prev) => {
       const next = prev.filter((ex) => ex.id !== exId)
       const removed = prev.find((ex) => ex.id === exId)
-      if (removed && fromDayRoutine) {
+      if (removed) {
         removeFromDayRoutine(exerciseKey(removed.muscleId, removed.exerciseName, removed.equipment))
         onRoutineChange?.()
       }
@@ -214,7 +270,42 @@ export function WorkoutLogger({
   }
 
   function updateEquipment(exId: string, equipment: Equipment) {
-    setExercises((prev) => prev.map((ex) => (ex.id === exId ? { ...ex, equipment } : ex)))
+    setExercises((prev) =>
+      prev.map((ex) => {
+        if (ex.id !== exId) return ex
+        const catalog = findCatalogExercise(ex.muscleId, ex.exerciseName)
+        const allowed = catalog?.variants.some((v) => v.equipment === equipment)
+        if (!allowed && catalog) return ex
+        setGifFailedIds((ids) => {
+          const next = new Set(ids)
+          next.delete(exId)
+          return next
+        })
+        return { ...ex, equipment }
+      }),
+    )
+  }
+
+  function openAddPicker() {
+    setAddingExercise(true)
+    setPickerMuscleId(selectedIds[0] ?? availableMuscles[0]?.id ?? null)
+  }
+
+  function handleAddExercise(muscleId: string, exercise: Exercise, equipment: Equipment) {
+    const key = exerciseKey(muscleId, exercise.name, equipment)
+    if (sessionKeys.has(key)) return
+
+    addToDayRoutine({
+      muscleId,
+      exerciseName: exercise.name,
+      equipment,
+      sets: exercise.sets,
+      reps: exercise.reps,
+    })
+    setExercises((prev) => [...prev, catalogToLogged(muscleId, exercise, equipment)])
+    setFromDayRoutine(true)
+    setAddingExercise(false)
+    onRoutineChange?.()
   }
 
   function handleSave() {
@@ -230,30 +321,44 @@ export function WorkoutLogger({
     }
     const prs = saveSession(session)
     setNewPrs(prs)
-    setSavedMsg(`Entrenamiento guardado — ${exercises.length} ejercicios, ${prs.length} PR${prs.length === 1 ? '' : 's'} nuevo${prs.length === 1 ? '' : 's'}.`)
+    setSavedMsg(
+      `Entrenamiento guardado — ${exercises.length} ejercicios, ${prs.length} PR${prs.length === 1 ? '' : 's'} nuevo${prs.length === 1 ? '' : 's'}.`,
+    )
     clearDayRoutine()
     setFromDayRoutine(false)
     setExercises([])
     setSelectedIds([])
     setDayLabel('')
+    setAddingExercise(false)
+    setPickerMuscleId(null)
     onRoutineChange?.()
     onWorkoutSaved?.(prs)
+  }
+
+  function markGifFailed(exId: string) {
+    setGifFailedIds((prev) => new Set(prev).add(exId))
   }
 
   return (
     <div className="workout-logger">
       <header className="workout-logger__header">
         <h2>Registrar entrenamiento</h2>
-        <p>Elegí ejercicios en Explorar o armá por músculos, y cargá peso, series y repeticiones.</p>
+        <p>
+          {exercises.length === 0
+            ? 'Elegí ejercicios en Explorar o armá por músculos, y registrá peso y reps acá.'
+            : 'GIF de referencia arriba; cargá kilos y reps abajo. Podés sumar más ejercicios sin salir.'}
+        </p>
       </header>
 
-      <BodyHalfFilterBar value={bodyHalfFilter} onChange={onBodyHalfChange} />
+      {exercises.length === 0 && (
+        <BodyHalfFilterBar value={bodyHalfFilter} onChange={onBodyHalfChange} />
+      )}
 
       {exercises.length === 0 ? (
         <>
           {draftCount === 0 && (
             <p className="workout-logger__hint">
-              Tip: en Explorar, cada ejercicio tiene el botón «Agregar a rutina del día».
+              Tip: en Explorar elegí el músculo y tocá «Agregar a rutina del día».
             </p>
           )}
 
@@ -313,137 +418,257 @@ export function WorkoutLogger({
           <div className="workout-logger__session-head">
             <div>
               <h3>{dayLabel.trim() || 'Rutina del día'}</h3>
-              {fromDayRoutine && (
-                <p className="workout-logger__session-source">
-                  {exercises.length} ejercicio{exercises.length === 1 ? '' : 's'} elegidos en Explorar
-                </p>
-              )}
+              <p className="workout-logger__session-source">
+                {exercises.length} ejercicio{exercises.length === 1 ? '' : 's'}
+                {fromDayRoutine ? ' · desde Explorar' : ''}
+              </p>
             </div>
-            <button
-              type="button"
-              className="workout-logger__back"
-              onClick={handleClearRoutine}
-            >
-              {fromDayRoutine ? 'Limpiar rutina' : 'Cambiar músculos'}
+            <button type="button" className="workout-logger__back" onClick={handleClearRoutine}>
+              {fromDayRoutine ? 'Limpiar' : 'Cambiar'}
             </button>
           </div>
 
-          {exercises.map((ex) => {
-            const fav = favorites.has(exerciseKey(ex.muscleId, ex.exerciseName, ex.equipment))
-            return (
-              <article key={ex.id} className="workout-logger__exercise">
-                <header className="workout-logger__ex-head">
-                  <div>
-                    <span className="workout-logger__ex-muscle">
-                      {muscles.find((m) => m.id === ex.muscleId)?.name}
-                    </span>
-                    <strong>
-                      {ex.exerciseName}
-                      {fav && <span className="workout-logger__fav" title="Favorito"> ★</span>}
-                    </strong>
-                  </div>
-                  <div className="workout-logger__ex-actions">
-                    <select
-                      className="workout-logger__equip"
-                      value={ex.equipment}
-                      onChange={(e) => updateEquipment(ex.id, e.target.value as Equipment)}
-                    >
-                      {(Object.keys(EQUIPMENT_LABELS) as Equipment[]).map((eq) => (
-                        <option key={eq} value={eq}>
-                          {EQUIPMENT_LABELS[eq]}
-                        </option>
-                      ))}
-                    </select>
-                    {fromDayRoutine && (
-                      <button
-                        type="button"
-                        className="workout-logger__remove-ex"
-                        onClick={() => removeExercise(ex.id)}
-                        aria-label="Quitar ejercicio"
-                      >
-                        Quitar
-                      </button>
-                    )}
-                  </div>
-                </header>
+          <div className="workout-logger__feed">
+            {exercises.map((ex) => {
+              const fav = favorites.has(exerciseKey(ex.muscleId, ex.exerciseName, ex.equipment))
+              const variant = resolveExerciseVariant(ex.muscleId, ex.exerciseName, ex.equipment)
+              const catalog = findCatalogExercise(ex.muscleId, ex.exerciseName)
+              const gifFailed = gifFailedIds.has(ex.id)
+              const equipOptions =
+                catalog?.variants.map((v) => v.equipment) ??
+                (Object.keys(EQUIPMENT_LABELS) as Equipment[])
 
-                <table className="workout-logger__table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Kg</th>
-                      <th>Reps</th>
-                      <th>Desc.</th>
-                      <th />
-                    </tr>
-                  </thead>
-                  <tbody>
+              return (
+                <article key={ex.id} className="workout-logger__exercise">
+                  <div className="workout-logger__demo">
+                    {variant && !gifFailed ? (
+                      <img
+                        src={gifUrl(variant.gifFile)}
+                        alt={`Demostración: ${ex.exerciseName}`}
+                        className="workout-logger__gif"
+                        loading="lazy"
+                        onError={() => markGifFailed(ex.id)}
+                      />
+                    ) : variant ? (
+                      <ExerciseIllustration id={variant.illustration} title={ex.exerciseName} />
+                    ) : (
+                      <div className="workout-logger__demo-empty" aria-hidden="true" />
+                    )}
+                    <span className="workout-logger__demo-label">
+                      {gifFailed || !variant ? 'Sin GIF' : 'Demo'}
+                    </span>
+                  </div>
+
+                  <header className="workout-logger__ex-head">
+                    <div>
+                      <span className="workout-logger__ex-muscle">
+                        {muscles.find((m) => m.id === ex.muscleId)?.name}
+                      </span>
+                      <strong>
+                        {ex.exerciseName}
+                        {fav && (
+                          <span className="workout-logger__fav" title="Favorito">
+                            {' '}
+                            ★
+                          </span>
+                        )}
+                      </strong>
+                    </div>
+                    <button
+                      type="button"
+                      className="workout-logger__remove-ex"
+                      onClick={() => removeExercise(ex.id)}
+                      aria-label="Quitar ejercicio"
+                    >
+                      Quitar
+                    </button>
+                  </header>
+
+                  {equipOptions.length > 1 ? (
+                    <div className="workout-logger__equip-row" role="group" aria-label="Equipo">
+                      {equipOptions.map((eq) => (
+                        <button
+                          key={eq}
+                          type="button"
+                          className={`workout-logger__equip-chip${ex.equipment === eq ? ' workout-logger__equip-chip--active' : ''}`}
+                          aria-pressed={ex.equipment === eq}
+                          onClick={() => updateEquipment(ex.id, eq)}
+                        >
+                          {EQUIPMENT_LABELS[eq]}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="workout-logger__equip-tag">
+                      {EQUIPMENT_LABELS[ex.equipment]}
+                    </span>
+                  )}
+
+                  {variant?.formGuide && (
+                    <p className="workout-logger__form">{variant.formGuide}</p>
+                  )}
+
+                  <div className="workout-logger__sets">
+                    <div className="workout-logger__sets-head" aria-hidden="true">
+                      <span>#</span>
+                      <span>Kg</span>
+                      <span>Reps</span>
+                      <span>Desc.</span>
+                      <span />
+                    </div>
                     {ex.sets.map((set, idx) => (
-                      <tr key={idx}>
-                        <td>{idx + 1}</td>
-                        <td>
+                      <div key={idx} className="workout-logger__set-row">
+                        <span className="workout-logger__set-num">{idx + 1}</span>
+                        <label className="workout-logger__set-field">
+                          <span className="visually-hidden">Kg serie {idx + 1}</span>
                           <input
                             type="number"
+                            inputMode="decimal"
                             min={0}
                             step={0.5}
                             value={set.weightKg || ''}
+                            placeholder="0"
                             onChange={(e) =>
                               updateSet(ex.id, idx, 'weightKg', parseFloat(e.target.value) || 0)
                             }
                           />
-                        </td>
-                        <td>
+                        </label>
+                        <label className="workout-logger__set-field">
+                          <span className="visually-hidden">Reps serie {idx + 1}</span>
                           <input
                             type="number"
+                            inputMode="numeric"
                             min={0}
                             value={set.reps || ''}
+                            placeholder="0"
                             onChange={(e) =>
                               updateSet(ex.id, idx, 'reps', parseInt(e.target.value, 10) || 0)
                             }
                           />
-                        </td>
-                        <td>
+                        </label>
+                        <label className="workout-logger__set-field">
+                          <span className="visually-hidden">Descanso serie {idx + 1}</span>
                           <input
                             type="number"
+                            inputMode="numeric"
                             min={0}
                             step={15}
                             value={set.restSec ?? ''}
+                            placeholder="90"
                             onChange={(e) =>
                               updateSet(ex.id, idx, 'restSec', parseInt(e.target.value, 10) || 0)
                             }
                           />
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            className="workout-logger__remove-set"
-                            onClick={() => removeSet(ex.id, idx)}
-                            aria-label="Quitar serie"
-                          >
-                            ×
-                          </button>
-                        </td>
-                      </tr>
+                        </label>
+                        <button
+                          type="button"
+                          className="workout-logger__remove-set"
+                          onClick={() => removeSet(ex.id, idx)}
+                          aria-label={`Quitar serie ${idx + 1}`}
+                        >
+                          ×
+                        </button>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
 
-                <button type="button" className="workout-logger__add-set" onClick={() => addSet(ex.id)}>
-                  + Serie
+                  <button type="button" className="workout-logger__add-set" onClick={() => addSet(ex.id)}>
+                    + Serie
+                  </button>
+
+                  <label className="workout-logger__notes">
+                    Notas
+                    <input
+                      type="text"
+                      placeholder="Técnica, sensaciones…"
+                      value={ex.notes ?? ''}
+                      onChange={(e) => updateNotes(ex.id, e.target.value)}
+                    />
+                  </label>
+                </article>
+              )
+            })}
+          </div>
+
+          {!addingExercise ? (
+            <button type="button" className="workout-logger__add-exercise" onClick={openAddPicker}>
+              + Sumar ejercicio
+            </button>
+          ) : (
+            <div className="workout-logger__add-panel">
+              <div className="workout-logger__add-panel-head">
+                <h4>Sumar ejercicio</h4>
+                <button
+                  type="button"
+                  className="workout-logger__back"
+                  onClick={() => setAddingExercise(false)}
+                >
+                  Cerrar
                 </button>
+              </div>
 
-                <label className="workout-logger__notes">
-                  Notas
-                  <input
-                    type="text"
-                    placeholder="Técnica, sensaciones…"
-                    value={ex.notes ?? ''}
-                    onChange={(e) => updateNotes(ex.id, e.target.value)}
-                  />
-                </label>
-              </article>
-            )
-          })}
+              <p className="workout-logger__add-hint">Elegí músculo y tocá el ejercicio.</p>
+
+              <div className="workout-logger__add-muscles" role="listbox" aria-label="Músculo">
+                {addPickerMuscles.map((muscle) => (
+                  <button
+                    key={muscle.id}
+                    type="button"
+                    role="option"
+                    aria-selected={pickerMuscleId === muscle.id}
+                    className={`workout-logger__add-muscle${pickerMuscleId === muscle.id ? ' workout-logger__add-muscle--active' : ''}`}
+                    onClick={() => setPickerMuscleId(muscle.id)}
+                  >
+                    {muscle.name}
+                  </button>
+                ))}
+              </div>
+
+              <ul className="workout-logger__add-list">
+                {pickerExercises.map((exercise) => {
+                  const defaultEq = exercise.variants[0]?.equipment
+                  if (!defaultEq) return null
+                  const already = exercise.variants.every((v) =>
+                    sessionKeys.has(exerciseKey(pickerMuscleId!, exercise.name, v.equipment)),
+                  )
+                  return (
+                    <li key={exercise.name} className="workout-logger__add-item">
+                      <div>
+                        <strong>{exercise.name}</strong>
+                        <span>
+                          {exercise.sets} × {exercise.reps}
+                        </span>
+                      </div>
+                      <div className="workout-logger__add-item-actions">
+                        {exercise.variants.map((v) => {
+                          const key = exerciseKey(pickerMuscleId!, exercise.name, v.equipment)
+                          const inSession = sessionKeys.has(key)
+                          return (
+                            <button
+                              key={v.equipment}
+                              type="button"
+                              className="workout-logger__add-eq"
+                              disabled={inSession}
+                              onClick={() =>
+                                pickerMuscleId &&
+                                handleAddExercise(pickerMuscleId, exercise, v.equipment)
+                              }
+                            >
+                              {inSession ? '✓ ' : '+ '}
+                              {EQUIPMENT_LABELS[v.equipment]}
+                            </button>
+                          )
+                        })}
+                      </div>
+                      {already && (
+                        <p className="workout-logger__add-done">Ya está en la sesión</p>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )}
 
           <button type="button" className="workout-logger__save" onClick={handleSave}>
             Guardar entrenamiento

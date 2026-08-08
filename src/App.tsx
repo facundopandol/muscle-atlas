@@ -125,8 +125,9 @@ function App() {
   const subtitleBySection: Record<AppSection, string> = {
     dashboard: 'Tu resumen de entrenamiento, récords y mapa de recuperación.',
     explore:
-      'Navegá por tren, grupo y músculo. Pensado para el celular: tocá cards, sin mapa.',
-    routines: 'Registrá peso, series, repeticiones, descanso y notas de cada ejercicio.',
+      'Elegí el músculo y sumá ejercicios a la rutina del día. Después registrá en Entrenar.',
+    routines:
+      'Registrá peso, series y reps con demo GIF. Podés sumar más ejercicios sin salir.',
     progress: 'Compara tus entrenamientos semana a semana o mes a mes.',
   }
 
@@ -134,7 +135,7 @@ function App() {
 
   return (
     <div className="app">
-      <header className={`app__header${!showSidePanel ? ' app__header--narrow' : ''}`}>
+      <header className={`app__header${section !== 'dashboard' ? ' app__header--narrow' : ''}`}>
         <div>
           <p className="app__eyebrow">Anatomía interactiva</p>
           <h1>Muscle Atlas</h1>
@@ -151,7 +152,15 @@ function App() {
         </div>
       </header>
 
-      <main className={`app__main${!showSidePanel ? ' app__main--single' : ''}`}>
+      <main
+        className={`app__main${
+          section === 'explore'
+            ? ' app__main--explore'
+            : !showSidePanel
+              ? ' app__main--single'
+              : ''
+        }`}
+      >
         {section === 'dashboard' && (
           <Dashboard
             refreshKey={refreshKey}

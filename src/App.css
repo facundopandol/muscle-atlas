@@ -90,6 +90,14 @@
   justify-content: center;
 }
 
+/* Explorar: lista vertical (navegación → ejercicios) */
+.app__main--explore {
+  max-width: var(--content-narrow);
+  grid-template-columns: 1fr;
+  justify-items: stretch;
+  gap: 1.15rem;
+}
+
 .app__explore-toolbar {
   grid-column: 1 / -1;
   display: flex;
@@ -200,7 +208,7 @@
 @media (max-width: 900px) {
   .app__main {
     grid-template-columns: 1fr;
-    justify-items: center;
+    justify-items: stretch;
   }
 
   .app__diagram-section {
@@ -209,7 +217,7 @@
 
   .muscle-panel {
     width: 100%;
-    max-width: 480px;
+    max-width: 100%;
     min-height: auto;
   }
 }

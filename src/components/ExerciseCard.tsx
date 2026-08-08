@@ -9,6 +9,8 @@ interface ExerciseCardProps {
   muscleId?: string
   focus?: ExerciseFocus | null
   highlighted?: boolean
+  /** feed = GIF grande arriba → abajo (Explorar / listas). Compacto por defecto en otros contextos. */
+  layout?: 'compact' | 'feed'
   isFavorite?: boolean
   isInRoutine?: (equipment: Equipment) => boolean
   onToggleFavorite?: (equipment: Equipment) => void
@@ -20,6 +22,7 @@ export function ExerciseCard({
   exercise,
   focus,
   highlighted,
+  layout = 'feed',
   isFavorite,
   isInRoutine,
   onToggleFavorite,
@@ -54,7 +57,7 @@ export function ExerciseCard({
   return (
     <li
       id={`exercise-${exercise.name.replace(/\s+/g, '-').toLowerCase()}`}
-      className={`exercise-card${highlighted ? ' exercise-card--highlighted' : ''}`}
+      className={`exercise-card exercise-card--${layout}${highlighted ? ' exercise-card--highlighted' : ''}`}
     >
       <div className="exercise-card__media">
         {!gifFailed ? (
